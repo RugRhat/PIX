@@ -17,12 +17,6 @@ public:
 	// Sets default values for this character's properties
 	APIXPlayer();
 
-	UFUNCTION(BlueprintPure)
-	bool IsAiming() const;
-
-	UFUNCTION(BlueprintPure)
-	bool IsDead() const;
-
 	// Returns health percentage for health bar.
 	UFUNCTION(BlueprintPure)
 	float GetHealthPercent() const;
@@ -41,6 +35,8 @@ private:
 	
 	void StartAiming();
 	void StopAiming();
+
+	bool IsDead() const;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* SpringArm;
@@ -66,11 +62,13 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<AWeapon> WeaponClass;
 
-	UPROPERTY(Replicated)
-	bool bDead;
+	// Start Aiming RPC (Remote Proceedure Call).
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_StartAiming();
 
-	UPROPERTY(Replicated)
-	bool bAiming;
+	// Stop Aiming RPC (Remote Proceedure Call).
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_StopAiming();
 
 	bool bCrouching;
 
@@ -86,4 +84,10 @@ protected:
 
 	// Called when damage is taken.
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const &DamageEvent, class AController *EventInstigator, AActor *DamageCauser) override;
+
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	bool bDead;
+
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	bool bAiming;
 };

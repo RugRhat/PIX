@@ -51,7 +51,7 @@ private:
 
 	// Pull trigger RPC (Remote Proceedure Call).
 	UFUNCTION(Server, Reliable, WithValidation)
-	void ServerPullTrigger();
+	void Server_PullTrigger();
 
 protected:
 	// Called when the game starts or when spawned

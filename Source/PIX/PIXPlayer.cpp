@@ -34,10 +34,7 @@ void APIXPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 
 	DOREPLIFETIME(APIXPlayer, Weapon);
 	DOREPLIFETIME(APIXPlayer, bDead);
-
-	// TODO: Figure out animation replication*.
-	// DOREPLIFETIME(APIXPlayer, bAiming);
-	// DOREPLIFETIME(APIXPlayer, bCrouching);
+	DOREPLIFETIME(APIXPlayer, bAiming);
 }
 
 // Called when the game starts or when spawned.
@@ -142,6 +139,12 @@ void APIXPlayer::PlayerCrouch()
 // Pulls camera in when aiming.
 void APIXPlayer::StartAiming() 
 {
+	// If client calls Start Aiming RPC is called to start aiming on server.
+	if(!HasAuthority())
+	{
+		Server_StartAiming();
+	}
+
 	bAiming = true;
 	SpringArm->TargetArmLength = 125.f;
 }
@@ -149,8 +152,36 @@ void APIXPlayer::StartAiming()
 // Returns camera to default position when not aiming.
 void APIXPlayer::StopAiming() 
 {
+	// If client calls Stop Aiming RPC is called to stop aiming on server.
+	if(!HasAuthority())
+	{
+		Server_StopAiming();
+	}
+
 	bAiming = false;
 	SpringArm->TargetArmLength = 250.f;
+}
+
+// Start Aiming RPC on server.
+void APIXPlayer::Server_StartAiming_Implementation() 
+{
+	StartAiming();
+}
+
+bool APIXPlayer::Server_StartAiming_Validate() 
+{
+	return true;
+}
+
+// Stop Aiming RPC on server.
+void APIXPlayer::Server_StopAiming_Implementation() 
+{
+	StopAiming();
+}
+
+bool APIXPlayer::Server_StopAiming_Validate() 
+{
+	return true;
 }
 
 // void APIXPlayer::Sprint() 
@@ -197,14 +228,10 @@ float APIXPlayer::TakeDamage(float DamageAmount, struct FDamageEvent const &Dama
 	return DamageToApply;
 }
 
-bool APIXPlayer::IsAiming() const
-{
-	return bAiming;
-}
-
 bool APIXPlayer::IsDead() const
 {
 	return Health <= 0;
 }
+
 
 

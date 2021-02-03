@@ -37,7 +37,7 @@ void AWeapon::PullTrigger()
 	// If client calls pull trigger RPC is called to pull trigger on server.
 	if(!GetOwner()->HasAuthority())
 	{
-		ServerPullTrigger();
+		Server_PullTrigger();
 	}
 	
 	FHitResult Hit;
@@ -107,13 +107,13 @@ AController* AWeapon::GetOwnerController() const
 }
 
 // Pull trigger RPC on server.
-void AWeapon::ServerPullTrigger_Implementation() 
+void AWeapon::Server_PullTrigger_Implementation() 
 {
 	PullTrigger();
 }
 
 // Pull trigger RPC validation to protect against cheating.
-bool AWeapon::ServerPullTrigger_Validate() 
+bool AWeapon::Server_PullTrigger_Validate() 
 {
 	return true;
 }
