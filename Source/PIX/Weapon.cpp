@@ -3,6 +3,7 @@
 
 #include "Weapon.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystem.h"
 #include "Net/UnrealNetwork.h"
 
@@ -46,14 +47,9 @@ void AWeapon::PullTrigger()
 
 	if(bHitSomething)
 	{
-		// For Debugging:
-		UE_LOG(LogTemp, Warning, TEXT("HIT!!!"));
-		
 		AActor* HitActor = Hit.GetActor();
 		if(HitActor != nullptr){
-			AController* OwnerController = GetOwnerController();
-			FPointDamageEvent DamageEvent(Damage, Hit, ShotDirection, nullptr);
-			HitActor->TakeDamage(Damage, DamageEvent, OwnerController, this);
+			UGameplayStatics::ApplyPointDamage(HitActor, Damage, ShotDirection, Hit, GetOwner()->GetInstigatorController(), GetOwner(), DamageType);
 		}
 
 		ImpactEffects(Hit.Location, ShotDirection.Rotation());

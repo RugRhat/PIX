@@ -17,7 +17,7 @@ public:
 
 	void PullTrigger();
 
-private:
+protected:
 	bool GunTrace(FHitResult& Hit, FVector& ShotDirection);
 
 	void ShootEffects();
@@ -30,6 +30,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	class USkeletalMeshComponent* Mesh;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	TSubclassOf<UDamageType> DamageType;
 
 	// UPROPERTY(EditAnywhere)
 	// UParticleSystem* MuzzleFlash;
@@ -53,7 +56,6 @@ private:
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_PullTrigger();
 
-protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 };
