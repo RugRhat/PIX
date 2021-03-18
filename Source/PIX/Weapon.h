@@ -17,11 +17,18 @@ public:
 
 	void PullTrigger();
 
+	void Reload();
+
+	UPROPERTY(ReplicatedUsing = OnRep_AmmoCount, BlueprintReadOnly, Category = "Weapon")
+	float AmmoCount; 
+
 protected:
 	bool GunTrace(FHitResult& Hit, FVector& ShotDirection);
 
 	void ShootEffects();
 	void ImpactEffects(FVector Location, FRotator Rotation);
+
+	bool HasAmmo();
 
 	AController* GetOwnerController() const;
 
@@ -34,23 +41,33 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	TSubclassOf<UDamageType> DamageType;
 
-	// UPROPERTY(EditAnywhere)
-	// UParticleSystem* MuzzleFlash;
+	UPROPERTY(EditDefaultsOnly)
+	float WeaponClipSize = 30.f;
 
-	// UPROPERTY(EditAnywhere)
-	// USoundBase* MuzzleSound;
+	UPROPERTY(EditAnywhere)
+	class USoundBase* Gunshot;
 
-	// UPROPERTY(EditAnywhere)
-	// UParticleSystem* ImpactEffect;
+	UPROPERTY(EditAnywhere)
+	class USoundBase* Dryfire;
 
-	// UPROPERTY(EditAnywhere)
-	// USoundBase* ImpactSound;
+	UPROPERTY(EditAnywhere)
+	class USoundBase* ImpactSound; 			// Using dry fire sound.
+
+	UPROPERTY(EditAnywhere)
+	class UMaterial* MuzzleFlash;
+	
+	UPROPERTY(EditAnywhere)
+	class UMaterial* ImpactEffect;
 
 	UPROPERTY(EditAnywhere)
 	float MaxRange = 1000.f;
 
 	UPROPERTY(EditAnywhere)
 	float Damage = 10.f;
+
+	// Handles what happens when ammo count is replicated.
+	UFUNCTION()
+	void OnRep_AmmoCount();
 
 	// Pull trigger RPC (Remote Proceedure Call).
 	UFUNCTION(Server, Reliable, WithValidation)

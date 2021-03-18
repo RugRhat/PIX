@@ -6,9 +6,10 @@
 #include "GameFramework/GameModeBase.h"
 #include "HordeGameMode.generated.h"
 
-/**
- * 
- */
+enum class EHordeState : uint8;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnActorKilled, APawn*, Victim, AController*, KillerController);
+
 UCLASS()
 class PIX_API AHordeGameMode : public AGameModeBase
 {
@@ -24,6 +25,10 @@ public:
 	// UFUNCTION(BlueprintCallable)
 	// int GetWave();
 
+	// Dynamic event that is assigned through blueprint.
+	UPROPERTY(BlueprintAssignable, Category = "GameMode")
+	FOnActorKilled OnActorKilled;
+
 protected:
 	// Creates a class of Enemy Characters. Horde BP set in editor.
 	UPROPERTY(EditDefaultsOnly)
@@ -38,9 +43,17 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Enemies")
 	int32 BaseNoOfEnemies = 5;
 
+	// Determines delay time before starting game. Can be changed from editor.
+	UPROPERTY(EditDefaultsOnly, Category = "GameMode")
+	float StartGameDelay;
+
 	// Determines time between waves. Can be changed from editor.
 	UPROPERTY(EditDefaultsOnly, Category = "GameMode")
 	float TimeBetweenWaves;
+
+	// Determines time between waves. Can be changed from editor.
+	UPROPERTY(EditDefaultsOnly, Category = "GameMode")
+	float RespawnDelay;
 	
 	// Handles spawning of enemies.
 	void SpawnEnemy();
@@ -64,6 +77,9 @@ protected:
 	// Handles game loss.
 	void HandleGameOver();
 
+	// Sets new game state.
+	void SetGameState(EHordeState NewState);
+
 	// Called when game starts, if gamemode selected.
 	virtual void BeginPlay() override;
 
@@ -75,6 +91,8 @@ protected:
 	int32 Wave;											// Current wave number.
 	int32 EnemiesToSpawn;								// Current number of enemies to spawn.
 
-	FTimerHandle TimerHandle_EnemySpawner;				// Timer for spawning enemies.
+	FTimerHandle TimerHandle_BeginGame;					// Timer for starting a new wave.
 	FTimerHandle TimerHandle_StartNewWave;				// Timer for starting a new wave.
+	FTimerHandle TimerHandle_EnemySpawner;				// Timer for spawning enemies.
+	FTimerHandle TimerHandle_RespawnDeadPlayers;		// Timer for respawning dead players.
 };

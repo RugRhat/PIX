@@ -2,7 +2,11 @@
 
 
 #include "HealthComponent.h"
+#include "FFAGameMode.h"
+#include "HordeGameMode.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "PlayerHUD.h"
 
 // Sets default values for this component's properties
 UHealthComponent::UHealthComponent()
@@ -10,7 +14,7 @@ UHealthComponent::UHealthComponent()
 	DefaultHealth = 100;
 	bIsDead = false;
 
-	TeamNum = 9;		// Nine is default for Horde AI characters.
+	TeamNum = 9;		// Nine is set for Horde AI characters in editor.
 
 	SetIsReplicatedByDefault(true);
 }
@@ -67,10 +71,41 @@ void UHealthComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage, c
 	{
 		UE_LOG(LogTemp, Log, TEXT("I'M DEAD!!!"));
 
-		// ASGameMode* GM = Cast<ASGameMode>(GetWorld()->GetAuthGameMode());
-		// if (GM)
+		/// TODO: Figure out best way to handle death on selected game mode.
+
+		AHordeGameMode* GM = GetWorld()->GetAuthGameMode<AHordeGameMode>();
+		if(GM)
+		{
+			APawn* MyPawn = Cast<APawn>(GetOwner());
+			if(!MyPawn){ return ;}
+
+			GM->OnActorKilled.Broadcast(MyPawn, InstigatedBy);
+
+			if(MyPawn->IsPlayerControlled())
+			{
+				APlayerHUD* HUD = Cast<APlayerHUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
+				if(!HUD){ return; }
+
+				HUD->OnPlayerDied.Broadcast(MyPawn, MyPawn->GetController());
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Something wrong with game mode"));
+		}
+
+		// AFFAGameMode* GM = GetWorld()->GetAuthGameMode<AFFAGameMode>();
+		// if(GM)
 		// {
-		// 	GM->OnActorKilled.Broadcast(GetOwner(), DamageCauser, InstigatedBy);
+		// 	APawn* MyPawn = Cast<APawn>(GetOwner());
+		// 	if(!MyPawn){ return ;}
+
+		// 	GM->OnActorKilled.Broadcast(MyPawn, InstigatedBy);
+
+		// 	APlayerHUD* HUD = Cast<APlayerHUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
+		// 	if(!HUD){ return; }
+
+		// 	HUD->OnPlayerDied.Broadcast(MyPawn, MyPawn->GetController());
 		// }
 	}
 }

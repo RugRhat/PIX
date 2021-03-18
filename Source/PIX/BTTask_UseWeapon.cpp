@@ -20,7 +20,14 @@ EBTNodeResult::Type UBTTask_UseWeapon::ExecuteTask(UBehaviorTreeComponent &Owner
     ABaseCharacter* Self = Cast<ABaseCharacter>(OwnerComp.GetAIOwner()->GetPawn());
     if(Self == nullptr){ return EBTNodeResult::Failed; }
 
-    Self->UseWeapon();
+    if(Self->GetAmmoCount() == 0)
+    {
+        Self->Reload();
+    }
+    else
+    {
+        Self->UseWeapon();
+    }
 
     return EBTNodeResult::Succeeded;
 }

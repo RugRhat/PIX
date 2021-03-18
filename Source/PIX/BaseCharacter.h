@@ -22,6 +22,15 @@ public:
 	UPROPERTY(Replicated, BlueprintReadOnly)
 	bool bDead;
 
+	// UPROPERTY(Replicated, BlueprintReadOnly)
+	UPROPERTY(Replicated, BlueprintReadWrite)
+	bool bReloading;
+
+	void Reload();
+
+	// Returns ammo count so AI knows when to reload.
+	float GetAmmoCount();
+
 protected:
 	// Called when the game starts or when spawned.
 	virtual void BeginPlay() override;
@@ -38,4 +47,8 @@ protected:
 	// Called when character health is changed.
 	UFUNCTION()
 	void OnHealthChanged(UHealthComponent* OwningHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
+
+	// Start Aiming RPC (Remote Proceedure Call).
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_Reload();
 };

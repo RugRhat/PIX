@@ -2,10 +2,12 @@
 
 
 #include "Weapon.h"
+// #include "BaseCharacter.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "Particles/ParticleSystem.h"
+#include "Materials/Material.h"
 #include "Net/UnrealNetwork.h"
+// #include "Particles/ParticleSystem.h"
 
 // Sets default values
 AWeapon::AWeapon()
@@ -26,10 +28,20 @@ AWeapon::AWeapon()
 	MinNetUpdateFrequency = 33.0f;
 }
 
+// Controls which properties are replicated.
+void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AWeapon, AmmoCount);
+}
+
 // Called when the game starts or when spawned
 void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
+
+	AmmoCount = WeaponClipSize;
 }
 
 // Weapon firing uses hitscan.
@@ -41,18 +53,23 @@ void AWeapon::PullTrigger()
 		Server_PullTrigger();
 	}
 	
-	FHitResult Hit;
-	FVector ShotDirection;
-	bool bHitSomething = GunTrace(Hit, ShotDirection);
-
-	if(bHitSomething)
+	if(HasAmmo())
 	{
-		AActor* HitActor = Hit.GetActor();
-		if(HitActor != nullptr){
-			UGameplayStatics::ApplyPointDamage(HitActor, Damage, ShotDirection, Hit, GetOwner()->GetInstigatorController(), GetOwner(), DamageType);
+		FHitResult Hit;
+		FVector ShotDirection;
+		bool bHitSomething = GunTrace(Hit, ShotDirection);
+
+		if(bHitSomething)
+		{
+			AActor* HitActor = Hit.GetActor();
+			if(HitActor != nullptr){
+				UGameplayStatics::ApplyPointDamage(HitActor, Damage, ShotDirection, Hit, GetOwner()->GetInstigatorController(), GetOwner(), DamageType);
+			}
+
+			ImpactEffects(Hit.Location, ShotDirection.Rotation());
 		}
 
-		ImpactEffects(Hit.Location, ShotDirection.Rotation());
+		AmmoCount --;
 	}
 
 	ShootEffects();
@@ -80,18 +97,48 @@ bool AWeapon::GunTrace(FHitResult& Hit, FVector& ShotDirection)
 	return GetWorld()->LineTraceSingleByChannel(Hit, Location, End, ECollisionChannel::ECC_GameTraceChannel1, Params);
 }
 
+void AWeapon::OnRep_AmmoCount() 
+{
+	// ShootEffects();
+}
+
 // Plays effects when weapon is shot.			TODO: Add effects.
 void AWeapon::ShootEffects() 
 {
 	// UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, Mesh, TEXT("MuzzleFlashSocket"));
-	// UGameplayStatics::SpawnSoundAttached(MuzzleSound, Mesh, TEXT("MuzzleSound"));
+
+	if(HasAmmo())
+	{
+		UGameplayStatics::SpawnSoundAttached(Gunshot, Mesh, TEXT("MuzzleSound"));
+	}
+	else
+	{
+		UGameplayStatics::SpawnSoundAttached(Dryfire, Mesh, TEXT("MuzzleSound"));
+	}
 }
 
 // Plays effects on impact.						TODO: Add effects.
 void AWeapon::ImpactEffects(FVector Location, FRotator Rotation) 
 {
 	// UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, Location, Rotation);
-	// UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSound, Location);
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSound, Location);
+}
+
+bool AWeapon::HasAmmo() 
+{
+	if(AmmoCount == 0)
+	{
+		return false;
+	}
+
+	return true; 
+}
+
+void AWeapon::Reload() 
+{
+	UE_LOG(LogTemp, Warning, TEXT("RELOADING!"));
+
+	AmmoCount = WeaponClipSize;
 }
 
 AController* AWeapon::GetOwnerController() const
@@ -101,6 +148,7 @@ AController* AWeapon::GetOwnerController() const
 
 	return OwnerPawn->GetController();
 }
+
 
 // Pull trigger RPC on server.
 void AWeapon::Server_PullTrigger_Implementation() 

@@ -24,6 +24,7 @@ void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 
 	DOREPLIFETIME(ABaseCharacter, Weapon);
 	DOREPLIFETIME(ABaseCharacter, bDead);
+	DOREPLIFETIME(ABaseCharacter, bReloading);
 }
 
 // Called when the game starts or when spawned.
@@ -53,6 +54,24 @@ void ABaseCharacter::UseWeapon()
 	Weapon->PullTrigger();
 }
 
+void ABaseCharacter::Reload() 
+{
+	// If client calls Reload RPC is called to reload on server.
+	if(!HasAuthority())
+	{
+		Server_Reload();
+	}
+
+	bReloading = true;
+
+	Weapon->Reload();
+}
+
+float ABaseCharacter::GetAmmoCount() 
+{
+	return Weapon->AmmoCount;
+}
+
 // Called when character health is changed.
 void ABaseCharacter::OnHealthChanged(UHealthComponent* OwningHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser) 
 {
@@ -64,12 +83,24 @@ void ABaseCharacter::OnHealthChanged(UHealthComponent* OwningHealthComp, float H
 		GetMovementComponent()->StopMovementImmediately();
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-		DetachFromControllerPendingDestroy();
+		// Stops AI from shooting at player if AI is dead.
+		if(!IsPlayerControlled())
+		{
+			DetachFromControllerPendingDestroy();
+		}
 
 		// Ensures that player's weapon also disapears from world on death.
-		Weapon->SetLifeSpan(5.0f);
-		SetLifeSpan(5.0f);
+		Weapon->SetLifeSpan(2.25f);
+		SetLifeSpan(2.25f);
 	}
 }
 
+void ABaseCharacter::Server_Reload_Implementation() 
+{
+	Reload();
+}
 
+bool ABaseCharacter::Server_Reload_Validate() 
+{
+	return true;
+}
