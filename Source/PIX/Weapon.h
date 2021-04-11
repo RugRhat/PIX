@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "Weapon.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWeaponFired);
+
 UCLASS()
 class PIX_API AWeapon : public AActor
 {
@@ -15,6 +17,7 @@ public:
 	// Sets default values for this actor's properties
 	AWeapon();
 
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void PullTrigger();
 
 	void Reload();
@@ -64,6 +67,10 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	float Damage = 10.f;
+	
+	// Dynamic event that is assigned through blueprint.
+    UPROPERTY(BlueprintAssignable, Category = "GameMode")
+    FOnWeaponFired WeaponFired;
 
 	// Handles what happens when ammo count is replicated.
 	UFUNCTION()

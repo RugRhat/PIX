@@ -105,6 +105,8 @@ void AWeapon::OnRep_AmmoCount()
 // Plays effects when weapon is shot.			TODO: Add effects.
 void AWeapon::ShootEffects() 
 {
+	WeaponFired.Broadcast();
+
 	// UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, Mesh, TEXT("MuzzleFlashSocket"));
 
 	if(HasAmmo())
