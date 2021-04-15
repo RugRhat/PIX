@@ -2,12 +2,10 @@
 
 
 #include "Weapon.h"
-// #include "BaseCharacter.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Materials/Material.h"
 #include "Net/UnrealNetwork.h"
-// #include "Particles/ParticleSystem.h"
 
 // Sets default values
 AWeapon::AWeapon()
@@ -44,7 +42,18 @@ void AWeapon::BeginPlay()
 	AmmoCount = WeaponClipSize;
 }
 
-// Weapon firing uses hitscan.
+void AWeapon::Tick(float DeltaSeconds) 
+{
+	Super::Tick(DeltaSeconds);
+
+	if(GetOwner()== nullptr)
+	{
+		SetLifeSpan(0.1f);
+	}
+
+}
+
+// Handles weapon firing using line trace.
 void AWeapon::PullTrigger() 
 {
 	// If client calls pull trigger RPC is called to pull trigger on server.
@@ -102,13 +111,9 @@ void AWeapon::OnRep_AmmoCount()
 	// ShootEffects();
 }
 
-// Plays effects when weapon is shot.			TODO: Add effects.
+// Plays effects when weapon is shot.			
 void AWeapon::ShootEffects() 
 {
-	WeaponFired.Broadcast();
-
-	// UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, Mesh, TEXT("MuzzleFlashSocket"));
-
 	if(HasAmmo())
 	{
 		UGameplayStatics::SpawnSoundAttached(Gunshot, Mesh, TEXT("MuzzleSound"));
@@ -119,13 +124,14 @@ void AWeapon::ShootEffects()
 	}
 }
 
-// Plays effects on impact.						TODO: Add effects.
+///TODO: Add effects.
+// Plays effects on impact.						
 void AWeapon::ImpactEffects(FVector Location, FRotator Rotation) 
 {
-	// UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, Location, Rotation);
 	UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSound, Location);
 }
 
+// Returns whether or not weapon has ammo.
 bool AWeapon::HasAmmo() 
 {
 	if(AmmoCount == 0)
@@ -139,10 +145,13 @@ bool AWeapon::HasAmmo()
 void AWeapon::Reload() 
 {
 	UE_LOG(LogTemp, Warning, TEXT("RELOADING!"));
+	
+	UGameplayStatics::SpawnSoundAttached(ReloadSound, Mesh, TEXT("MuzzleSound"));
 
 	AmmoCount = WeaponClipSize;
 }
 
+// Returns controller which "owns" weapon.
 AController* AWeapon::GetOwnerController() const
 {
 	APawn* OwnerPawn = Cast<APawn>(GetOwner());

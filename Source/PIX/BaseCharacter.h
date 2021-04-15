@@ -17,38 +17,41 @@ public:
 	// Sets default values for this character's properties.
 	ABaseCharacter();
 
-	void UseWeapon();
-
-	UPROPERTY(Replicated, BlueprintReadOnly)
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Gameplay")
 	bool bDead;
 
-	// UPROPERTY(Replicated, BlueprintReadOnly)
-	UPROPERTY(Replicated, BlueprintReadWrite)
+	UPROPERTY(Replicated, BlueprintReadWrite, Category = "Gameplay")
 	bool bReloading;
 
+	// Called when fire button pressed or when AI decides to shoot.
+	void UseWeapon();
+
+	// Called to trigger weapon reloading and reload animation.
 	void Reload();
 
 	// Returns ammo count so AI knows when to reload.
 	float GetAmmoCount();
-
+	
 protected:
 	// Called when the game starts or when spawned.
 	virtual void BeginPlay() override;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Health")
 	class UHealthComponent* HealthComponent;
 
 	UPROPERTY(Replicated)
 	AWeapon* Weapon;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	TSubclassOf<AWeapon> WeaponClass;
 
 	// Called when character health is changed.
 	UFUNCTION()
 	void OnHealthChanged(UHealthComponent* OwningHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
-	// Start Aiming RPC (Remote Proceedure Call).
+	// Reload RPC (Remote Proceedure Call).
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_Reload();
+
+	void SpawnWeapon();
 };

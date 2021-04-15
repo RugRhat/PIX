@@ -4,6 +4,7 @@
 #include "DefaultPlayerState.h"
 
 
+// Called by player/actor death event to increase player kill count.
 void ADefaultPlayerState::IncreaseKillCount() 
 {
     KillCount ++;
@@ -12,6 +13,7 @@ void ADefaultPlayerState::IncreaseKillCount()
     UE_LOG(LogTemp, Warning, TEXT("Player Kill Count: %d"), KillCount);
 }
 
+// Called by player/actor death event to increase player death count.
 void ADefaultPlayerState::IncreaseDeathCount() 
 {
     DeathCount ++;
@@ -19,5 +21,3 @@ void ADefaultPlayerState::IncreaseDeathCount()
     // For debugging.
     UE_LOG(LogTemp, Warning, TEXT("Player Death Count: %d"), DeathCount);
 }
-
-

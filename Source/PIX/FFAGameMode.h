@@ -3,70 +3,56 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/GameModeBase.h"
+#include "GameFramework/GameMode.h"
 #include "FFAGameMode.generated.h"
 
-enum class EFFAState : uint8;
-
+// Called by health component when a player dies.
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnActorKilledFFA, APawn*, Victim, AController*, KillerController);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameWon, AController*, WinnerController);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameLost, AController*, LoserController);
 
 UCLASS()
-class PIX_API AFFAGameMode : public AGameModeBase
+class PIX_API AFFAGameMode : public AGameMode
 {
 	GENERATED_BODY()
-	
+
 public: 
 	// Sets default values for this gamemode's properties.
 	AFFAGameMode();
 
-	// Dynamic event that is assigned through blueprint.
-	UPROPERTY(BlueprintAssignable, Category = "GameMode")
+	// Event called by health component when a player dies that is assigned through blueprint.
+	UPROPERTY(BlueprintAssignable, Category = "Gameplay")
 	FOnActorKilledFFA OnActorKilled;
 
-	// Dynamic event that is assigned through blueprint.
-	UPROPERTY(BlueprintAssignable, Category = "GameMode")
-	FOnGameWon Winner;
-
-	// Dynamic event that is assigned through blueprint.
-	UPROPERTY(BlueprintAssignable, Category = "GameMode")
-	FOnGameLost Loser;
+	// Checks if max kill count reached.
+	UFUNCTION(BlueprintCallable, Category = "Gameplay")
+	void CheckKillCount();
 
 protected:
 	// Max number of kills required to win game.
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Gameplay")
 	uint32 MaxKills = 15;
 
 	// Determines delay time before starting game. Can be changed from editor.
 	UPROPERTY(EditDefaultsOnly, Category = "GameMode")
 	float StartMatchDelay;
 
-	// Determines time between waves. Can be changed from editor.
-	UPROPERTY(EditDefaultsOnly, Category = "GameMode")
-	float RespawnDelay;
-
-	// Checks if max kill count reached.
-	void CheckKillCount();
-
-	// Handles starting game match.
-	void StartMatch();
-
-	UFUNCTION(BlueprintCallable, Category = "GameMode")
+	// Places each player on a unique team.
+	UFUNCTION(BlueprintCallable, Category = "Gameplay") 
 	void SetPlayerTeams();
 
+	// Changes match state to cue intro and starts countdown to start of match.
+	void CueGameIntro();
+
 	// Handles game over.
-	void HandleGameOver();
-
-	// Sets new game state.
-	void SetGameState(EFFAState NewState);
-
-	// Called when game starts, if gamemode selected.
-	virtual void BeginPlay() override;
+	void HandleGameOver(class APlayerController* PlayerController);
 
 	// Called every frame.
 	virtual void Tick(float DeltaSeconds) override;
 
+	// Handles starting game match.
+	virtual void StartMatch() override;
+
+	// Called when the game starts or when spawned.
+	virtual void BeginPlay() override;
+
 	FTimerHandle TimerHandle_StartMatch;					// Timer for starting a new match.
-	FTimerHandle TimerHandle_RespawnDeadPlayer;				// Timer for respawning dead player.
 };

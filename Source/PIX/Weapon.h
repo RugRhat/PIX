@@ -17,7 +17,7 @@ public:
 	// Sets default values for this actor's properties
 	AWeapon();
 
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	// Handles weapon firing using line trace.
 	void PullTrigger();
 
 	void Reload();
@@ -26,13 +26,19 @@ public:
 	float AmmoCount; 
 
 protected:
+	// Handles linetrace and returns whether trace was successful.
 	bool GunTrace(FHitResult& Hit, FVector& ShotDirection);
 
+	// Plays effects when weapon is shot.
 	void ShootEffects();
+
+	// Plays effects on impact.
 	void ImpactEffects(FVector Location, FRotator Rotation);
 
+	// Returns whether or not weapon has ammo.
 	bool HasAmmo();
 
+	// Returns controller which "owns" weapon.
 	AController* GetOwnerController() const;
 
 	UPROPERTY(VisibleAnywhere)
@@ -40,6 +46,10 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	class USkeletalMeshComponent* Mesh;
+
+	// Dynamic event that is assigned through blueprint.
+    UPROPERTY(BlueprintAssignable, Category = "Weapon")
+    FOnWeaponFired WeaponFired;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	TSubclassOf<UDamageType> DamageType;
@@ -54,23 +64,16 @@ protected:
 	class USoundBase* Dryfire;
 
 	UPROPERTY(EditAnywhere)
-	class USoundBase* ImpactSound; 			// Using dry fire sound.
+	class USoundBase* ImpactSound; 	
 
 	UPROPERTY(EditAnywhere)
-	class UMaterial* MuzzleFlash;
-	
-	UPROPERTY(EditAnywhere)
-	class UMaterial* ImpactEffect;
+	class USoundBase* ReloadSound;		
 
 	UPROPERTY(EditAnywhere)
 	float MaxRange = 1000.f;
 
 	UPROPERTY(EditAnywhere)
 	float Damage = 10.f;
-	
-	// Dynamic event that is assigned through blueprint.
-    UPROPERTY(BlueprintAssignable, Category = "GameMode")
-    FOnWeaponFired WeaponFired;
 
 	// Handles what happens when ammo count is replicated.
 	UFUNCTION()
@@ -82,4 +85,7 @@ protected:
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	// Called every frame.
+	virtual void Tick(float DeltaSeconds) override;
 };

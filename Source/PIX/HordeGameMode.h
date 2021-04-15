@@ -3,15 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/GameModeBase.h"
+#include "GameFramework/GameMode.h"
 #include "HordeGameMode.generated.h"
 
-enum class EHordeState : uint8;
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnActorKilled, APawn*, Victim, AController*, KillerController);
+// Called by health component when a character dies.
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnActorKilledH, APawn*, Victim, AController*, KillerController);
 
 UCLASS()
-class PIX_API AHordeGameMode : public AGameModeBase
+class PIX_API AHordeGameMode : public AGameMode
 {
 	GENERATED_BODY()
 
@@ -19,15 +18,13 @@ public:
 	// Sets default values for this gamemode's properties.
 	AHordeGameMode();
 
-	// UFUNCTION(BlueprintImplementableEvent)
-	// void GameOver(bool PlayerWon);
+	// Event called by health component when a character dies that is assigned through blueprint.
+	UPROPERTY(BlueprintAssignable, Category = "Gameplay")
+	FOnActorKilledH OnActorKilled;
 
-	// UFUNCTION(BlueprintCallable)
-	// int GetWave();
-
-	// Dynamic event that is assigned through blueprint.
-	UPROPERTY(BlueprintAssignable, Category = "GameMode")
-	FOnActorKilled OnActorKilled;
+	// Handles player health regeneration if any players alive. If no players alive, ends game. 
+	UFUNCTION(BlueprintCallable, Category = "Gameplay")
+	void PlayersAlive();
 
 protected:
 	// Creates a class of Enemy Characters. Horde BP set in editor.
@@ -40,12 +37,12 @@ protected:
 
 	// Determines the base number of enemies to add each wave. 
 	// Value multiplied by wave number. Can be changed from editor.
-	UPROPERTY(EditDefaultsOnly, Category = "Enemies")
+	UPROPERTY(EditDefaultsOnly, Category = "Gameplay")
 	int32 BaseNoOfEnemies = 5;
 
 	// Determines delay time before starting game. Can be changed from editor.
 	UPROPERTY(EditDefaultsOnly, Category = "GameMode")
-	float StartGameDelay;
+	float StartMatchDelay;
 
 	// Determines time between waves. Can be changed from editor.
 	UPROPERTY(EditDefaultsOnly, Category = "GameMode")
@@ -54,16 +51,22 @@ protected:
 	// Determines time between waves. Can be changed from editor.
 	UPROPERTY(EditDefaultsOnly, Category = "GameMode")
 	float RespawnDelay;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Gameplay")
+	int32 TeamKills = 0;
 	
+	UFUNCTION(BlueprintCallable, Category = "Gameplay")
+	void IncreaseTeamKillCount();
+
 	// Handles spawning of enemies.
 	void SpawnEnemy();
 
 	void StartWave();
-	void NewWave();
+	void NewWave();			// Increases no. of enemies & wave no.
 	void EndWave();
 
-	// Handles player health regeneration if any players alive. If no players alive, ends game. 
-	void PlayersAlive();
+	// Changes match state to cue intro and starts countdown to start of match.
+	void CueGameIntro();
 
 	// Checks if any enemies alive. If not, a new wave begins.
 	void EnemiesAlive();
@@ -77,21 +80,21 @@ protected:
 	// Handles game loss.
 	void HandleGameOver();
 
-	// Sets new game state.
-	void SetGameState(EHordeState NewState);
-
-	// Called when game starts, if gamemode selected.
-	virtual void BeginPlay() override;
-
 	// Called every frame.
 	virtual void Tick(float DeltaSeconds) override;
+
+	// Handles starting game match.
+	virtual void StartMatch() override;
+
+	// Called when the game starts or when spawned.
+	virtual void BeginPlay() override;
 
 	TArray<AActor*> SpawnLocations;						// Array of all Horde spawn points in current map.
 
 	int32 Wave;											// Current wave number.
 	int32 EnemiesToSpawn;								// Current number of enemies to spawn.
 
-	FTimerHandle TimerHandle_BeginGame;					// Timer for starting a new wave.
+	FTimerHandle TimerHandle_StartMatch;				// Timer for starting match.
 	FTimerHandle TimerHandle_StartNewWave;				// Timer for starting a new wave.
 	FTimerHandle TimerHandle_EnemySpawner;				// Timer for spawning enemies.
 	FTimerHandle TimerHandle_RespawnDeadPlayers;		// Timer for respawning dead players.

@@ -15,25 +15,16 @@ class PIX_API APlayerCharacter : public ABaseCharacter
 	GENERATED_BODY()
 	
 public:
+	// Sets default values.
 	APlayerCharacter();
 
 	// Returns health percentage for health bar.
 	UFUNCTION(BlueprintPure)
 	float GetHealthPercent() const;
 
+	class UCharacterMovementComponent* MovementComponent;
+	
 protected:
-	void MoveForward(float AxisValue);	
-	void MoveRight(float AxisValue);
-	void LookUpRate(float AxisValue);
-	void LookRightRate(float AxisValue);
-	
-	void Jump();
-	void PlayerCrouch();
-	// void Sprint();		TODO: Implement sprinting.
-	
-	void StartAiming();
-	void StopAiming();
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* SpringArm;
 
@@ -60,8 +51,29 @@ protected:
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_StopAiming();
 
+	// Called when by lobby menu to change player's weapon.
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void ChangeWeapon(TSubclassOf<AWeapon> NewWeapon);
+
+	void MoveForward(float AxisValue);	
+	void MoveRight(float AxisValue);
+	void LookUpRate(float AxisValue);
+	void LookRightRate(float AxisValue);
+	
+	void Jump();
+	void PlayerCrouch();
+
+	/// TODO: Implement sprinting.
+	// void Sprint();		
+	
+	void StartAiming();
+	void StopAiming();
+
 	// Called when the game starts or when spawned.
 	virtual void BeginPlay() override;
+
+	// Called every frame.
+	virtual void Tick(float DeltaSeconds) override;
 
 	// Called to bind functionality to input.
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -69,5 +81,7 @@ protected:
 	// Used to control whether character crouch / uncrouch is called.
 	bool bCrouching;
 
-	class UCharacterMovementComponent* MovementComponent;
+	// Pointer to player's health component.
+	class UHealthComponent* HealthComp;
+
 };

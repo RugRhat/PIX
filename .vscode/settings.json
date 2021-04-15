@@ -1,7 +1,10 @@
 {
 	"files.exclude": {
-		"C:/Users/Angelica .DESKTOP-RM5JOAJ/Documents/Senior_Project/PIX/.vscode": true,
-		"C:/Users/Angelica .DESKTOP-RM5JOAJ/Documents/Senior_Project/PIX/Content": true,
-		"C:/Users/Angelica .DESKTOP-RM5JOAJ/Documents/Senior_Project/PIX/Intermediate": true
+		"C:/Users/Angelica .DESKTOP-RM5JOAJ/Documents/Senior_Project/GEL_PIX 2.0/.vs": true,
+		"C:/Users/Angelica .DESKTOP-RM5JOAJ/Documents/Senior_Project/GEL_PIX 2.0/.vscode": true,
+		"C:/Users/Angelica .DESKTOP-RM5JOAJ/Documents/Senior_Project/GEL_PIX 2.0/Content": true,
+		"C:/Users/Angelica .DESKTOP-RM5JOAJ/Documents/Senior_Project/GEL_PIX 2.0/DerivedDataCache": true,
+		"C:/Users/Angelica .DESKTOP-RM5JOAJ/Documents/Senior_Project/GEL_PIX 2.0/Intermediate": true,
+		"C:/Users/Angelica .DESKTOP-RM5JOAJ/Documents/Senior_Project/GEL_PIX 2.0/Saved": true
 	}
 }
