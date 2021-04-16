@@ -3,50 +3,55 @@
 
 #include "PIXGameInstance.h"
 #include "Engine/Engine.h"
+#include "Engine/SkeletalMesh.h"
+#include "Engine/World.h"
+#include "LobbyMenu.h"
 #include "MainMenu.h"
 #include "MenuWidget.h"
+#include "PlayerCharacter.h"
+#include "UObject/Class.h"
 #include "UObject/ConstructorHelpers.h"
 
-
+// Sets default values for properties with initialization.
 UPIXGameInstance::UPIXGameInstance(const FObjectInitializer &ObjectInitializer) 
 {
-    // Allows for more control of Menu ui from source code rather than blueprints.
-    ConstructorHelpers::FClassFinder<UUserWidget>MenuBPClass(TEXT("/Game/UI/WBP_MainMenu"));
+    // Allows for more control of Menu UI from source code rather than blueprints.
+    ConstructorHelpers::FClassFinder<UUserWidget>MenuBPClass(TEXT("/Game/UI/Menus/WBP_MainMenu"));
     if(!ensure(MenuBPClass.Class != nullptr)) return;
 
     MenuClass = MenuBPClass.Class;
 
-    // // Allows for more control of Death Screen from source code rather than blueprints.
-    // ConstructorHelpers::FClassFinder<UUserWidget>DeathBPClass(TEXT("/Game/UI/WBP_DeathScreen"));
-    // if(!ensure(DeathBPClass.Class != nullptr)) return;
+    // Allows for more control of Menu UI from source code rather than blueprints.
+    ConstructorHelpers::FClassFinder<UUserWidget>LobbyMenuBPClass(TEXT("/Game/UI/Menus/WBP_LobbyMenu"));
+    if(!ensure(LobbyMenuBPClass.Class != nullptr)) return;
 
-    // DeathScreenClass = DeathBPClass.Class;
+    LobbyMenuClass = LobbyMenuBPClass.Class;
 
-    // // Allows for more control of Respawn Screen from source code rather than blueprints.
-    // ConstructorHelpers::FClassFinder<UUserWidget>RespawnBPClass(TEXT("/Game/UI/WBP_RespawnScreen"));
-    // if(!ensure(RespawnBPClass.Class != nullptr)) return;
+    // // Allows for more control of Menu UI from source code rather than blueprints.
+    // ConstructorHelpers::FClassFinder<UUserWidget>InGameMenuBPClass(TEXT("/Game/UI/WBP_InGameMenu"));
+    // if(!ensure(InGameMenuBPClass.Class != nullptr)) return;
 
-    // RespawnScreenClass = RespawnBPClass.Class;
+    // InGameMenuClass = InGameMenuBPClass.Class;
 
-    // // Allows for more control of Spectate Screen from source code rather than blueprints.
-    // ConstructorHelpers::FClassFinder<UUserWidget>SpectateBPClass(TEXT("/Game/UI/WBP_SpectateScreen"));
-    // if(!ensure(SpectateBPClass.Class != nullptr)) return;
+    // // Allows for more control of Menu UI from source code rather than blueprints.
+    // ConstructorHelpers::FClassFinder<UUserWidget>EndGameMenuBPClass(TEXT("/Game/UI/WBP_EndGameMenu"));
+    // if(!ensure(EndGameMenuBPClass.Class != nullptr)) return;
 
-    // SpectateScreenClass = SpectateBPClass.Class;
+    // EndGameMenuClass = EndGameMenuBPClass.Class;
 
-    // Allows for more control of Win Screen ui from source code rather than blueprints.
-    // ConstructorHelpers::FClassFinder<UUserWidget>WinScreenMenuBPClass(TEXT("/Game/Blueprints/UI/WBP_WinScreen"));
-    // if(!ensure(WinScreenMenuBPClass.Class != nullptr)) return;
+    PlayerTeam = 1;
 
-    // WinScreenMenuClass = WinScreenMenuBPClass.Class;
+    bCharChosen = false;
 }
 
 // Sets up custom game instance properties.
 void UPIXGameInstance::Init() 
 {
     UE_LOG(LogTemp, Warning, TEXT("Found class: %s"), *MenuClass->GetName());
+    UE_LOG(LogTemp, Warning, TEXT("Found class: %s"), *LobbyMenuClass->GetName());
 }
 
+// Loads menu.
 void UPIXGameInstance::LoadMenu() 
 {
     if(!ensure(MenuClass != nullptr)) return;
@@ -58,20 +63,71 @@ void UPIXGameInstance::LoadMenu()
     Menu->SetMenuInterface(this);
 }
 
-// void UPIXGameInstance::LoadWinScreen() 
-// {
-    
-// }
+// Loads lobby menu widget.
+void UPIXGameInstance::LoadLobbyMenu() 
+{
+    if(!ensure(LobbyMenuClass != nullptr)) return;
 
+    LobbyMenu = CreateWidget<ULobbyMenu>(this, LobbyMenuClass);
+
+    LobbyMenu->Setup();
+
+    LobbyMenu->SetMenuInterface(this);
+}
+
+// Loads in-game menu widget.
+void UPIXGameInstance::LoadInGameMenu() 
+{
+    // if(!ensure(InGameMenuClass != nullptr)) return;
+
+    // InGameMenu = CreateWidget<UInGameMenu>(this, InGameMenuClass);
+
+    // InGameMenu->Setup();
+
+    // InGameMenu->SetMenuInterface(this);
+}
+
+// Loads end game menu widget.
+void UPIXGameInstance::LoadEndGameMenu() 
+{
+    // if(!ensure(EndGameMenuClass != nullptr)) return;
+
+    // EndGameMenu = CreateWidget<UEGMenu>(this, EndGameMenuClass);
+
+    // EndGameMenu->Setup();
+
+    // EndGameMenu->SetMenuInterface(this);
+}
+
+// Sets owning player's chosen character.
+void UPIXGameInstance::SetPlayerCharacter(USkeletalMesh* ChosenCharacter)
+{
+    bCharChosen = true;
+    PlayerChar = ChosenCharacter;
+
+    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Player Character chosen"));
+}
+
+void UPIXGameInstance::SetPlayerWeapon(TSubclassOf<AWeapon>ChosenWeapon) 
+{
+    bWeaponChosen = true;
+    PlayerWeapon = ChosenWeapon;
+
+    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Player weapon chosen"));
+}
+
+// Takes single player to default game mode map: Horde.
 void UPIXGameInstance::Single() 
 {
     UWorld* World = GetWorld();
     if(!ensure(World != nullptr)) return;
 
-    World->ServerTravel("/Game/Maps/Horde?listen");      // Switches to Horde map. 
+    World->ServerTravel("/Game/Maps/GameModes/Horde?game=/Game/Blueprints/GameModes/BP_HordeGameMode.BP_HordeGameMode_C?listen");      // Switches to Horde map. 
+
+    SetGameModeID("Horde");
 }
 
-// Creates console command "Host".
+// Takes host player to lobby.
 void UPIXGameInstance::Host() 
 {
     if(Menu != nullptr)
@@ -87,12 +143,10 @@ void UPIXGameInstance::Host()
     UWorld* World = GetWorld();
     if(!ensure(World != nullptr)) return;
 
-    World->ServerTravel("/Game/Maps/Lobby?listen");      // Switches to Lobby map.
-
-    Single();
+    World->ServerTravel("/Game/Maps/Lobby?game=/Game/Blueprints/GameModes/BP_LobbyGameMode.BP_LobbyGameMode_C?listen");      // Switches to Lobby map.
 }
 
-// Creates console command "Join".
+// Takes player to lobby on host's server using given IPAddress.
 void UPIXGameInstance::Join(const FString &Address) 
 {
     if(Menu != nullptr)
@@ -108,36 +162,40 @@ void UPIXGameInstance::Join(const FString &Address)
     APlayerController* PlayerController = GetFirstLocalPlayerController();
     if(!ensure(PlayerController != nullptr)) return;
 
+    UE_LOG(LogTemp, Warning, TEXT("Traveling to server..."));
+
     PlayerController->ClientTravel(Address, ETravelType::TRAVEL_Absolute);          // Travels to host's lobby.
+
+    UE_LOG(LogTemp, Warning, TEXT("After traveling to server"));
 }
 
+// Set's gamemode of future game to game mode chosen by host.
 void UPIXGameInstance::SetGameMode(const FString &GameMode) 
 {
-    if(GameMode == "Horde")
-    {
-        ///TODO: SelectedGame = Horde file path.
-    }
-    else if(GameMode == "FFA")
-    {
-        ///TODO: SelectedGame = FFA file path.
-    }
-    else if(GameMode == "DM")
-    {
-        ///TODO: SelectedGame = DM file path.
-    }
-
-    ///TODO: Add the "? listen" jawn.
+    SelectedGameMode = GameMode;
 }
 
+// Set's game mode ID to be used by health component to handle death events.
+void UPIXGameInstance::SetGameModeID(const FString &GameModeID) 
+{
+    GMID = GameModeID;
+}
+
+// Load's map and game mode which correspond's to the chosen game mode.
 void UPIXGameInstance::LoadGame() 
 {
+    if(LobbyMenu != nullptr)
+    {
+        LobbyMenu->RemoveMenu();
+    }
+
     UWorld* World = GetWorld();
     if(!ensure(World != nullptr)) return;
 
-    World->ServerTravel(SelectedGame);
+   World->ServerTravel(SelectedGameMode);
 }
 
-// Loads Main Menu level.
+// Loads main menu map.
 void UPIXGameInstance::LoadMainMenu() 
 {
     APlayerController* PlayerController = GetFirstLocalPlayerController();
@@ -146,45 +204,40 @@ void UPIXGameInstance::LoadMainMenu()
     PlayerController->ClientTravel("/Game/Maps/Intro", ETravelType::TRAVEL_Absolute);
 }
 
+// "Replays" game by having the server re-travel to game mode map.
 void UPIXGameInstance::Replay() 
 {
     UWorld* World = GetWorld();
     if(!ensure(World != nullptr)) return;
-
-    World->ServerTravel(SelectedGame);      // "Replays" by reloading/switching to level.
+    
+    World->ServerTravel(SelectedGameMode);      // "Replays" by reloading/switching to level.
 }
 
-// void UPIXGameInstance::LoadDeathScreen() 
-// {
-//     if(!ensure(DeathScreenClass != nullptr)) return;
+// Sets owning player's team.
+void UPIXGameInstance::SetPlayerTeam(int Team) 
+{
+    PlayerTeam = Team;
+}
 
-//     UMenuWidget* DeathScreen = CreateWidget<UMenuWidget>(this, DeathScreenClass);
+// Sets owning player's unique specified name.
+void UPIXGameInstance::SetPlayerName(FString Name) 
+{
+    PlayerName = Name;
 
-//     DeathScreen->Setup();
-
-//     DeathScreen->SetMenuInterface(this);
-// }
-
-// void UPIXGameInstance::LoadRespawnScreen() 
-// {
-//     if(!ensure(RespawnScreenClass != nullptr)) return;
-
-//     UMenuWidget* RespawnScreen = CreateWidget<UMenuWidget>(this, RespawnScreenClass);
-
-//     RespawnScreen->Setup();
-
-//     RespawnScreen->SetMenuInterface(this);
-// }
-
-// void UPIXGameInstance::LoadSpectateScreen() 
-// {
-//     if(!ensure(SpectateScreenClass != nullptr)) return;
-
-//     UMenuWidget* SpectateScreen = CreateWidget<UMenuWidget>(this, SpectateScreenClass);
-
-//     SpectateScreen->Setup();
-
-//     SpectateScreen->SetMenuInterface(this);
-// }
+    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Player Name: %s"), *PlayerName));
+}
 
 
+// Return's active game mode ID.
+FString UPIXGameInstance::GetGameModeID() 
+{
+    // For when not running game from startup. (Set appropriate GM ID).
+    if(GMID == "") 
+    { 
+        return "FFA";       // Defaults to free for all     (FOR DEV ONLY!!!)
+    }
+    else
+    {
+        return GMID;
+    }
+}

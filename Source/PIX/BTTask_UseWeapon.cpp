@@ -11,6 +11,7 @@ UBTTask_UseWeapon::UBTTask_UseWeapon()
     NodeName = TEXT("UseWeapon");
 }
 
+// Called when behavior tree is ready to shoot at player.
 EBTNodeResult::Type UBTTask_UseWeapon::ExecuteTask(UBehaviorTreeComponent &OwnerComp, uint8 *NodeMemory) 
 {
     Super::ExecuteTask(OwnerComp, NodeMemory);

@@ -27,7 +27,7 @@ void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ABaseCharacter, bReloading);
 }
 
-// Called when the game starts or when spawned.
+// Called when the game starts or when character is spawned.
 void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -37,23 +37,31 @@ void ABaseCharacter::BeginPlay()
 	// "Has authority" refers to server. Server controls spawning of selected weapon.
 	if(HasAuthority())
 	{
-		// Ensures that weapon spawns even if colliding with character mesh.
-		FActorSpawnParameters SpawnParam;
-		SpawnParam.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		
-		Weapon = GetWorld()->SpawnActor<AWeapon>(WeaponClass, SpawnParam);
-		if(!ensure(Weapon != nullptr)){return;}
-
-		Weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("WeaponSocket"));
-		Weapon->SetOwner(this);
+		SpawnWeapon();
 	}
 }
 
+void ABaseCharacter::SpawnWeapon() 
+{
+	// Ensures that weapon spawns even if colliding with character mesh.
+	FActorSpawnParameters SpawnParam;
+	SpawnParam.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	
+	Weapon = GetWorld()->SpawnActor<AWeapon>(WeaponClass, SpawnParam);
+	if(!ensure(Weapon != nullptr)){return;}
+
+	Weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("WeaponSocket"));
+	Weapon->SetOwner(this);
+
+}
+
+// Called when fire button pressed or when AI decides to shoot.
 void ABaseCharacter::UseWeapon() 
 {
 	Weapon->PullTrigger();
 }
 
+// Called to trigger weapon reloading and reload animation.
 void ABaseCharacter::Reload() 
 {
 	// If client calls Reload RPC is called to reload on server.
@@ -62,11 +70,12 @@ void ABaseCharacter::Reload()
 		Server_Reload();
 	}
 
-	bReloading = true;
+	// bReloading = true;
 
 	Weapon->Reload();
 }
 
+// Returns ammo count so AI knows when to reload.
 float ABaseCharacter::GetAmmoCount() 
 {
 	return Weapon->AmmoCount;
@@ -95,6 +104,8 @@ void ABaseCharacter::OnHealthChanged(UHealthComponent* OwningHealthComp, float H
 	}
 }
 
+
+// Reload RPC (Remote Proceedure Call).
 void ABaseCharacter::Server_Reload_Implementation() 
 {
 	Reload();

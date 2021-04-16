@@ -30,6 +30,7 @@ void AHordeAI::Tick(float DeltaSeconds)
 
     APlayerCharacter* TargetPlayer = nullptr;
     
+    // Iterates through all active players to find nearest player to target.
     for (FConstPlayerControllerIterator ControlledPlayer = GetWorld()->GetPlayerControllerIterator(); ControlledPlayer; ++ControlledPlayer)
 	{
 		APlayerController* PlayerController = ControlledPlayer->Get();

@@ -6,7 +6,10 @@
 #include "HordeGameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "PIXGameInstance.h"
+#include "PIXGameState.h"
 #include "PlayerHUD.h"
+#include "TDMGameMode.h"
 
 // Sets default values for this component's properties
 UHealthComponent::UHealthComponent()
@@ -14,7 +17,7 @@ UHealthComponent::UHealthComponent()
 	DefaultHealth = 100;
 	bIsDead = false;
 
-	TeamNum = 9;		// Nine is set for Horde AI characters in editor.
+	TeamNum = 9;		// Default is set to 9 for Horde AI.
 
 	SetIsReplicatedByDefault(true);
 }
@@ -45,6 +48,19 @@ void UHealthComponent::BeginPlay()
 	Health = DefaultHealth;
 }
 
+// Assigns player's team to TeamNum.
+void UHealthComponent::SetPlayerTeam() 
+{
+	APlayerController* PlayerController = Cast<APlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+	
+	if(PlayerController->GetPawn())
+	{
+		UPIXGameInstance* GameInstance = Cast<UPIXGameInstance>(PlayerController->GetPawn()->GetGameInstance());
+
+		TeamNum = GameInstance->PlayerTeam;
+	}
+}
+
 // Handles what happens when character health is replicated.
 void UHealthComponent::OnRep_Health(float OldHealth) 
 {
@@ -71,17 +87,17 @@ void UHealthComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage, c
 	{
 		UE_LOG(LogTemp, Log, TEXT("I'M DEAD!!!"));
 
-		/// TODO: Figure out best way to handle death on selected game mode.
+		APawn* MyPawn = Cast<APawn>(GetOwner());
+		if(!MyPawn){ return ;}
 
-		AHordeGameMode* GM = GetWorld()->GetAuthGameMode<AHordeGameMode>();
-		if(GM)
+		HandleGMDeath(MyPawn, InstigatedBy);
+
+		if(MyPawn->IsPlayerControlled())
 		{
-			APawn* MyPawn = Cast<APawn>(GetOwner());
-			if(!MyPawn){ return ;}
-
-			GM->OnActorKilled.Broadcast(MyPawn, InstigatedBy);
-
-			if(MyPawn->IsPlayerControlled())
+			APIXGameState* GameState = Cast<APIXGameState>(GetWorld()->GetGameState());
+			if(!GameState){ return; }
+			
+			if(GameState->GetMatchState() != "WaitingPostMatch")
 			{
 				APlayerHUD* HUD = Cast<APlayerHUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
 				if(!HUD){ return; }
@@ -89,24 +105,6 @@ void UHealthComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage, c
 				HUD->OnPlayerDied.Broadcast(MyPawn, MyPawn->GetController());
 			}
 		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Something wrong with game mode"));
-		}
-
-		// AFFAGameMode* GM = GetWorld()->GetAuthGameMode<AFFAGameMode>();
-		// if(GM)
-		// {
-		// 	APawn* MyPawn = Cast<APawn>(GetOwner());
-		// 	if(!MyPawn){ return ;}
-
-		// 	GM->OnActorKilled.Broadcast(MyPawn, InstigatedBy);
-
-		// 	APlayerHUD* HUD = Cast<APlayerHUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
-		// 	if(!HUD){ return; }
-
-		// 	HUD->OnPlayerDied.Broadcast(MyPawn, MyPawn->GetController());
-		// }
 	}
 }
 
@@ -130,7 +128,8 @@ void UHealthComponent::Heal(float HealAmount)
 {
 	if (HealAmount <= 0.0f || Health <= 0.0f){ return; }
 
-	Health = FMath::Clamp(Health + HealAmount, 0.0f, DefaultHealth);
+	// Ensures that health is never less than 0 or more than Default Health.
+	Health = FMath::Clamp(Health + HealAmount, 0.0f, DefaultHealth);	
 
 	OnHealthChanged.Broadcast(this, Health, -HealAmount, nullptr, nullptr, nullptr);
 }
@@ -141,4 +140,38 @@ float UHealthComponent::GetHealth() const
 	return Health;
 }
 
-
+// Handles triggering actor killed event on active gamemode.
+void UHealthComponent::HandleGMDeath(APawn* Victim, class AController* KillerController) 
+{
+	class UPIXGameInstance* GameInstanceRef = Cast<UPIXGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+	if(GameInstanceRef)
+	{
+	 	// if(GameInstanceRef->GetGameModeID() == "Horde")
+	 	// {
+	 		AHordeGameMode* GM = GetWorld()->GetAuthGameMode<AHordeGameMode>();
+			if(GM)
+			{ 
+				UE_LOG(LogTemp, Warning, TEXT("Game Mode: HORDE"));
+				GM->OnActorKilled.Broadcast(Victim, KillerController); 
+			}
+	 	// }
+		// else if(GameInstanceRef->GetGameModeID() == "TDM")
+		// {
+		// 	ATDMGameMode* GM = GetWorld()->GetAuthGameMode<ATDMGameMode>();
+		// 	if(GM)
+		// 	{
+		// 		UE_LOG(LogTemp, Warning, TEXT("Game Mode: TDM"));
+		// 		GM->OnActorKilled.Broadcast(Victim, KillerController);
+		// 	}
+		// }
+	 	// else //if(GameInstanceRef->GetGameModeID() == "FFA")		// FOR DEV ONLY!!!! 
+	 	// {
+		// 	AFFAGameMode* GM = GetWorld()->GetAuthGameMode<AFFAGameMode>();
+		// 	if(GM)
+		// 	{ 
+		// 		UE_LOG(LogTemp, Warning, TEXT("Game Mode: FFA"));
+		// 		GM->OnActorKilled.Broadcast(Victim, KillerController); 
+		// 	}
+	 	// }
+	}
+}

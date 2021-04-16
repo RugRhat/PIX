@@ -4,81 +4,93 @@
 #include "FFAGameMode.h"
 #include "DefaultPlayerState.h"
 #include "EngineUtils.h"
-#include "FFAGameState.h"
+#include "PIXGameState.h"
 #include "HealthComponent.h"
+#include "PIXGameInstance.h"
 #include "PlayerCharacter.h"
+#include "PlayerHUD.h"
 #include "TimerManager.h"
 
-
+// Sets default values for this gamemode's properties.
 AFFAGameMode::AFFAGameMode() 
 {
-    RespawnDelay = 5.0f;
-    StartMatchDelay = 8.0f;
+    StartMatchDelay = 5.0f;
 
-    // Sets Default Player State as game mode's player state.
+    GameStateClass = APIXGameState::StaticClass();
     PlayerStateClass = ADefaultPlayerState::StaticClass();
+    DefaultPawnClass = APlayerCharacter::StaticClass();
 
     PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.TickInterval = 1.0f;
 }
 
+// Called when the game starts or when spawned.
 void AFFAGameMode::BeginPlay() 
 {
     Super::BeginPlay();
 
-    SetGameState(EFFAState::WaitingToBegin);
+    SetMatchState("WaitingForPlayers");
 
-    GetWorldTimerManager().SetTimer(TimerHandle_StartMatch, this, &AFFAGameMode::StartMatch, StartMatchDelay, false);
+    SetActorTickEnabled(true);
 }
 
-void AFFAGameMode::SetGameState(EFFAState NewState) 
+// Handles starting game match.
+void AFFAGameMode::StartMatch() 
 {
-    AFFAGameState* ThisGameState = GetGameState<AFFAGameState>();
-	if (ensureAlways(ThisGameState))
-	{
-		ThisGameState->SetGameState(NewState);
-	}
+    Super::StartMatch();
+    
+    UE_LOG(LogTemp, Warning, TEXT("Start Match"));
 }
 
+// Called every frame.
 void AFFAGameMode::Tick(float DeltaSeconds) 
 {
     Super::Tick(DeltaSeconds);
 
-    CheckKillCount();
+    // Wait for all players to load into map before triggering intro.
+    if(NumTravellingPlayers == 0 && MatchState == "WaitingForPlayers")
+    {
+        CueGameIntro();
+    }
+    
+    if(!(MatchState == "WaitingForPlayers" || MatchState == "GameModeIntro"))
+    {
+        CheckKillCount();
+    }
 }
 
-void AFFAGameMode::StartMatch() 
-{
-    SetPlayerTeams();
-
-    SetGameState(EFFAState::MatchStarted);
-
-    SetActorTickEnabled(true);    
-}
-
-///TODO: Figure out better way to do this.
+// Places each player on a unique team.
 void AFFAGameMode::SetPlayerTeams() 
 {
     int Team = 1;
+
     for (FConstPlayerControllerIterator ControlledPlayer = GetWorld()->GetPlayerControllerIterator(); ControlledPlayer; ++ControlledPlayer)
 	{
-		APlayerController* PlayerController = ControlledPlayer->Get();
-		if (PlayerController->GetPawn())
-		{
-            APawn* MyPawn = PlayerController->GetPawn();
-			UHealthComponent* HealthComp = Cast<UHealthComponent>(MyPawn->GetComponentByClass(UHealthComponent::StaticClass()));
-
-            if(ensure(HealthComp))
-            {
-                HealthComp->TeamNum = Team;
-                Team ++;
-
-                UE_LOG(LogTemp, Warning, TEXT("Team No. : %d"), HealthComp->TeamNum);
-            }
+        APlayerController* PlayerController = Cast<APlayerController>(ControlledPlayer->Get());
+        UPIXGameInstance* GameInstance = Cast<UPIXGameInstance>(PlayerController->GetGameInstance());
+        
+        if(ensure(GameInstance))
+        {
+            GameInstance->PlayerTeam = Team;
+            Team ++;
         }
     }
 }
 
+
+/// TODO: Play test how well this works.
+void AFFAGameMode::CueGameIntro() 
+{
+    SetMatchState("GameModeIntro");
+
+    SetPlayerTeams();
+
+    GetWorldTimerManager().SetTimer(TimerHandle_StartMatch, this, &AFFAGameMode::StartMatch, StartMatchDelay, false);
+
+    SetMatchState("InProgress");
+}
+
+// Checks if max kill count reached.
 void AFFAGameMode::CheckKillCount() 
 {
     for (FConstPlayerControllerIterator ControlledPlayer = GetWorld()->GetPlayerControllerIterator(); ControlledPlayer; ++ControlledPlayer)
@@ -91,47 +103,35 @@ void AFFAGameMode::CheckKillCount()
 
             if(PlayerState->KillCount == MaxKills)
             {
-                HandleGameOver();
+                HandleGameOver(PlayerController);
             } 
         }
     }
 }
 
-// void AFFAGameMode::RespawnPlayers() 
-// {
-    
-// }
-
-void AFFAGameMode::HandleGameOver() 
+// Handles game over.
+void AFFAGameMode::HandleGameOver(APlayerController* Winner) 
 {
     SetActorTickEnabled(false);
-    
-    SetGameState(EFFAState::GameOver);
+
+    EndMatch();
 
     for (FConstPlayerControllerIterator ControlledPlayer = GetWorld()->GetPlayerControllerIterator(); ControlledPlayer; ++ControlledPlayer)
 	{
 		APlayerController* PlayerController = ControlledPlayer->Get();
-		if (PlayerController->GetPawn())
+		if (PlayerController)
 		{
-            ADefaultPlayerState* PlayerState = Cast<ADefaultPlayerState>(PlayerController->GetPawn()->GetPlayerState());
-            if(!PlayerState){ return; }
+            APlayerHUD* HUD = Cast<APlayerHUD>(PlayerController->GetHUD());
+			if(!HUD){ return; }
 
-            if(PlayerState->KillCount == MaxKills)
+            if(PlayerController == Winner)
             {
-                Winner.Broadcast(PlayerController);
+                HUD->Winner.Broadcast(PlayerController);
             }
             else
             {
-                Loser.Broadcast(PlayerController);
+                HUD->Loser.Broadcast(PlayerController);
             } 
         }
     }
-
-    UE_LOG(LogTemp, Log, TEXT("GAME OVER! Max Kill Count Reached"));
 }
-
-
-
-
-
-

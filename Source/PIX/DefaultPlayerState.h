@@ -12,15 +12,17 @@ class PIX_API ADefaultPlayerState : public APlayerState
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "PlayerState")
+	// Called by player/actor death event to increase player kill count.
+	UFUNCTION(BlueprintCallable, Category = "Kill/Death")
 	void IncreaseKillCount();
 
-	UFUNCTION(BlueprintCallable, Category = "PlayerState")
+	// Called by player/actor death event to increase player death count.
+	UFUNCTION(BlueprintCallable, Category = "Kill/Death")
 	void IncreaseDeathCount();
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "Kill/Death")
 	int32 KillCount = 0;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "Kill/Death")
 	int32 DeathCount = 0;
 };
