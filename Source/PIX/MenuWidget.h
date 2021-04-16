@@ -18,11 +18,7 @@ class PIX_API UMenuWidget : public UUserWidget
 public:
 	void SetMenuInterface(IMenuInterface* MenuInt);
 
-	// Adds widget to screen and allows for mouse control.
 	void Setup();
-
-	// Removes widget & mouse from viewport.
-	UFUNCTION(BlueprintCallable, Category = "Menu")
 	void RemoveMenu();
 
 protected:

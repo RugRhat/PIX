@@ -5,7 +5,7 @@
 			"name": "PIX (Debug)",
 			"request": "launch",
 			"preLaunchTask": "PIX Win64 Debug Build",
-			"program": "C:\\Users\\Angelica .DESKTOP-RM5JOAJ\\Documents\\Senior_Project\\GEL_PIX 2.0\\Binaries\\Win64\\UE4-Win64-Debug.exe",
+			"program": "C:\\Users\\Angelica .DESKTOP-RM5JOAJ\\Documents\\Senior_Project\\PIX\\Binaries\\Win64\\UE4-Win64-Debug.exe",
 			"args": [
 			],
 			"cwd": "C:\\Program Files\\Epic Games\\UE_4.25",
@@ -18,7 +18,7 @@
 			"name": "PIX (DebugGame)",
 			"request": "launch",
 			"preLaunchTask": "PIX Win64 DebugGame Build",
-			"program": "C:\\Users\\Angelica .DESKTOP-RM5JOAJ\\Documents\\Senior_Project\\GEL_PIX 2.0\\Binaries\\Win64\\UE4-Win64-DebugGame.exe",
+			"program": "C:\\Users\\Angelica .DESKTOP-RM5JOAJ\\Documents\\Senior_Project\\PIX\\Binaries\\Win64\\UE4-Win64-DebugGame.exe",
 			"args": [
 			],
 			"cwd": "C:\\Program Files\\Epic Games\\UE_4.25",
@@ -31,7 +31,7 @@
 			"name": "PIX (Development)",
 			"request": "launch",
 			"preLaunchTask": "PIX Win64 Development Build",
-			"program": "C:\\Users\\Angelica .DESKTOP-RM5JOAJ\\Documents\\Senior_Project\\GEL_PIX 2.0\\Binaries\\Win64\\UE4.exe",
+			"program": "C:\\Users\\Angelica .DESKTOP-RM5JOAJ\\Documents\\Senior_Project\\PIX\\Binaries\\Win64\\UE4.exe",
 			"args": [
 			],
 			"cwd": "C:\\Program Files\\Epic Games\\UE_4.25",
@@ -44,7 +44,7 @@
 			"name": "PIX (Shipping)",
 			"request": "launch",
 			"preLaunchTask": "PIX Win64 Shipping Build",
-			"program": "C:\\Users\\Angelica .DESKTOP-RM5JOAJ\\Documents\\Senior_Project\\GEL_PIX 2.0\\Binaries\\Win64\\UE4-Win64-Shipping.exe",
+			"program": "C:\\Users\\Angelica .DESKTOP-RM5JOAJ\\Documents\\Senior_Project\\PIX\\Binaries\\Win64\\UE4-Win64-Shipping.exe",
 			"args": [
 			],
 			"cwd": "C:\\Program Files\\Epic Games\\UE_4.25",
@@ -57,7 +57,7 @@
 			"name": "PIX (Test)",
 			"request": "launch",
 			"preLaunchTask": "PIX Win64 Test Build",
-			"program": "C:\\Users\\Angelica .DESKTOP-RM5JOAJ\\Documents\\Senior_Project\\GEL_PIX 2.0\\Binaries\\Win64\\UE4-Win64-Test.exe",
+			"program": "C:\\Users\\Angelica .DESKTOP-RM5JOAJ\\Documents\\Senior_Project\\PIX\\Binaries\\Win64\\UE4-Win64-Test.exe",
 			"args": [
 			],
 			"cwd": "C:\\Program Files\\Epic Games\\UE_4.25",
@@ -72,7 +72,7 @@
 			"preLaunchTask": "PIXEditor Win64 Debug Build",
 			"program": "C:\\Program Files\\Epic Games\\UE_4.25\\Engine\\Binaries\\Win64\\UE4Editor-Win64-Debug.exe",
 			"args": [
-				"C:\\Users\\Angelica .DESKTOP-RM5JOAJ\\Documents\\Senior_Project\\GEL_PIX 2.0\\PIX.uproject"
+				"C:\\Users\\Angelica .DESKTOP-RM5JOAJ\\Documents\\Senior_Project\\PIX\\PIX.uproject"
 			],
 			"cwd": "C:\\Program Files\\Epic Games\\UE_4.25",
 			"stopAtEntry": false,
@@ -86,7 +86,7 @@
 			"preLaunchTask": "PIXEditor Win64 DebugGame Build",
 			"program": "C:\\Program Files\\Epic Games\\UE_4.25\\Engine\\Binaries\\Win64\\UE4Editor-Win64-DebugGame.exe",
 			"args": [
-				"C:\\Users\\Angelica .DESKTOP-RM5JOAJ\\Documents\\Senior_Project\\GEL_PIX 2.0\\PIX.uproject"
+				"C:\\Users\\Angelica .DESKTOP-RM5JOAJ\\Documents\\Senior_Project\\PIX\\PIX.uproject"
 			],
 			"cwd": "C:\\Program Files\\Epic Games\\UE_4.25",
 			"stopAtEntry": false,
@@ -100,7 +100,7 @@
 			"preLaunchTask": "PIXEditor Win64 Development Build",
 			"program": "C:\\Program Files\\Epic Games\\UE_4.25\\Engine\\Binaries\\Win64\\UE4Editor.exe",
 			"args": [
-				"C:\\Users\\Angelica .DESKTOP-RM5JOAJ\\Documents\\Senior_Project\\GEL_PIX 2.0\\PIX.uproject"
+				"C:\\Users\\Angelica .DESKTOP-RM5JOAJ\\Documents\\Senior_Project\\PIX\\PIX.uproject"
 			],
 			"cwd": "C:\\Program Files\\Epic Games\\UE_4.25",
 			"stopAtEntry": false,
@@ -117,7 +117,7 @@
 			"args": [
 				"-projectfiles",
 				"-vscode",
-				"-project=\"C:\\Users\\Angelica .DESKTOP-RM5JOAJ\\Documents\\Senior_Project\\GEL_PIX 2.0\\PIX.uproject\"",
+				"-project=\"C:\\Users\\Angelica .DESKTOP-RM5JOAJ\\Documents\\Senior_Project\\PIX\\PIX.uproject\"",
 				"-game",
 				"-engine"
 			],

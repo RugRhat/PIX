@@ -6,7 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "HealthComponent.generated.h"
 
-// OnHealthChanged event called when health changes for any reason.
+// OnHealthChanged event
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_SixParams(FOnHealthChangedSignature, UHealthComponent*, OwningHealthComp, float, Health, float, HealthDelta, const class UDamageType*, DamageType, class AController*, InstigatedBy, AActor*, DamageCauser);
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -18,30 +18,35 @@ public:
 	// Sets default values for this component's properties
 	UHealthComponent();
 
-	// Event called when health changes for any reason.
+	// TODO: huh?
 	UPROPERTY(BlueprintAssignable)
 	FOnHealthChangedSignature OnHealthChanged;
 
-	/// TODO: Remove UPROPERTY for final build since using game instance team as official team.
 	// Indicates which team player is on. Can be changed from editor.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gameplay")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HealthComponent")
 	uint8 TeamNum;
 
 	// Determines character's max health. Can be changed from editor.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HealthComponent")
 	float DefaultHealth;
 
-	// Handles character healing.		// UFUNCTION for if called as a reward for killing a player.
+	// Handles character healing.
 	UFUNCTION(BlueprintCallable, Category = "HealthComponent")
 	void Heal(float HealAmount);
 
-	// Assigns player's team to TeamNum.
-	void SetPlayerTeam();
-	
+	// Determines if given characters are on the same team (friendly).
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "HealthComponent")
+	static bool IsFriendly(AActor* ActorA, AActor* ActorB);
+
 	// Returns character's health.
 	float GetHealth() const;
 
 protected:
+	bool bIsDead;
+
+	// Called when the game starts.
+	virtual void BeginPlay() override;
+
 	// Players actual health that changes during gameplay.
 	UPROPERTY(ReplicatedUsing = OnRep_Health, BlueprintReadOnly, Category = "HealthComponent")
 	float Health;
@@ -53,15 +58,4 @@ protected:
 	// Called when the character sustains any damage.
 	UFUNCTION()
 	void HandleTakeAnyDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
-	
-	// Called when the game starts or when spawned.
-	virtual void BeginPlay() override;
-
-	// Handles triggering actor killed event on active gamemode.
-	void HandleGMDeath(APawn* Victim, class AController* KillerController);
-
-	// Determines if given characters are on the same team (friendly).
-	static bool IsFriendly(AActor* ActorA, AActor* ActorB);
-		
-	bool bIsDead;
 };

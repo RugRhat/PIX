@@ -5,10 +5,6 @@
 #include "Components/Button.h"
 #include "Components/EditableTextBox.h"
 #include "Components/WidgetSwitcher.h"
-#include "DefaultPlayerState.h"
-#include "Engine/Engine.h"
-#include "Kismet/GameplayStatics.h"
-#include "PIXGameInstance.h"
 
 
 bool UMainMenu::Initialize() 
@@ -21,6 +17,9 @@ bool UMainMenu::Initialize()
 
     if(!ensure(EnterNameButton != nullptr)) return false;
     EnterNameButton->OnClicked.AddDynamic(this, &UMainMenu::SetPlayerName);
+
+    if(!ensure(SelectCharButton != nullptr)) return false;
+    SelectCharButton->OnClicked.AddDynamic(this, &UMainMenu::SetPlayerChar);
 
     if(!ensure(SinglePlayerButton != nullptr)) return false;
     SinglePlayerButton->OnClicked.AddDynamic(this, &UMainMenu::HostServer);
@@ -41,7 +40,10 @@ bool UMainMenu::Initialize()
     PNSQuitButton->OnClicked.AddDynamic(this, &UMainMenu::QuitGame);
 
     if(!ensure(MMBackButton != nullptr)) return false;
-    MMBackButton->OnClicked.AddDynamic(this, &UMainMenu::ReturnToPlayerName);
+    MMBackButton->OnClicked.AddDynamic(this, &UMainMenu::ReturnToChooseChar);
+
+    if(!ensure(CCSBackButton != nullptr)) return false;
+    CCSBackButton->OnClicked.AddDynamic(this, &UMainMenu::ReturnToPlayerName);
 
     if(!ensure(JMBackButton != nullptr)) return false;
     JMBackButton->OnClicked.AddDynamic(this, &UMainMenu::ReturnToMain);
@@ -49,38 +51,42 @@ bool UMainMenu::Initialize()
     return true;
 }
 
-// Assigns user specified player name.
 void UMainMenu::SetPlayerName() 
 {
-    UPIXGameInstance* GameInstance = Cast<UPIXGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
-    
-    if(!ensure(GameInstance != nullptr)) return;
-    if(!ensure(PlayerName != nullptr)) return;
+    // if(MenuInterface != nullptr)
+    // {
+    //     if(!ensure(PlayerName != nullptr)) return;
 
-    PlaySound(ButtonPressed);
+    //     FString Name = PlayerName->GetText().ToString();
+    //     MenuInterface->SetPlayerName(Name);
+    // }
 
-    FString Name = PlayerName->GetText().ToString();
-    GameInstance->SetPlayerName(Name);
+    OpenChooseCharScreen();
+}
+
+void UMainMenu::SetPlayerChar() 
+{
+    // if(MenuInterface != nullptr)
+    // {
+    //     if(!ensure(IPAddress != nullptr)) return;
+
+    //     FString Address = IPAddress->GetText().ToString();
+    //     MenuInterface->SetPlayerChar(Address);
+    // }
 
     OpenMainMenu();
 }
 
 void UMainMenu::HostServer() 
 {
-    PlaySound(ButtonPressed);
-    
     if(MenuInterface != nullptr)
     {
-
         MenuInterface->Host();
     }
 }
 
-// Joins server running on player specified IPAddress.
 void UMainMenu::JoinServer() 
 {
-    PlaySound(ButtonPressed);
-
     if(MenuInterface != nullptr)
     {
         if(!ensure(IPAddress != nullptr)) return;
@@ -95,17 +101,21 @@ void UMainMenu::OpenPlayerName()
     if(!ensure(MenuSwitcher != nullptr)) return;
     if(!ensure(PlayerNameScreen != nullptr)) return;
 
-    PlaySound(ButtonPressed);
-
     MenuSwitcher->SetActiveWidget(PlayerNameScreen);
+}
+
+void UMainMenu::OpenChooseCharScreen() 
+{
+    if(!ensure(MenuSwitcher != nullptr)) return;
+    if(!ensure(ChooseCharScreen != nullptr)) return;
+
+    MenuSwitcher->SetActiveWidget(ChooseCharScreen);
 }
 
 void UMainMenu::OpenMainMenu() 
 {
     if(!ensure(MenuSwitcher != nullptr)) return;
     if(!ensure(MainMenu != nullptr)) return;
-
-    PlaySound(ButtonPressed);
 
     MenuSwitcher->SetActiveWidget(MainMenu);
 }
@@ -116,20 +126,23 @@ void UMainMenu::OpenJoinMenu()
     if(!ensure(MenuSwitcher != nullptr)) return;
     if(!ensure(JoinMenu != nullptr)) return;
 
-    PlaySound(ButtonPressed);
-
     MenuSwitcher->SetActiveWidget(JoinMenu);
 }
 
-// Returns to player name widget screen.
 void UMainMenu::ReturnToPlayerName() 
 {
     if(!ensure(MenuSwitcher != nullptr)) return;
     if(!ensure(PlayerNameScreen != nullptr)) return;
 
-    PlaySound(ButtonPressed);
-
     MenuSwitcher->SetActiveWidget(PlayerNameScreen);
+}
+
+void UMainMenu::ReturnToChooseChar() 
+{
+    if(!ensure(MenuSwitcher != nullptr)) return;
+    if(!ensure(ChooseCharScreen != nullptr)) return;
+
+    MenuSwitcher->SetActiveWidget(ChooseCharScreen);
 }
 
 // Takes player back to Main Menu.
@@ -138,15 +151,11 @@ void UMainMenu::ReturnToMain()
     if(!ensure(MenuSwitcher != nullptr)) return;
     if(!ensure(MainMenu != nullptr)) return;
 
-    PlaySound(ButtonPressed);
-
     MenuSwitcher->SetActiveWidget(MainMenu);
 }
 
 void UMainMenu::QuitGame() 
 {
-    PlaySound(ButtonPressed);
-
     UWorld* World = GetWorld();
     if(!ensure(World != nullptr)) return;
 

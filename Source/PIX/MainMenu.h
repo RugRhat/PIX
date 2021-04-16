@@ -15,10 +15,6 @@ class PIX_API UMainMenu : public UMenuWidget
 	GENERATED_BODY()
 
 private:
-	// Button pressed sound.
-	UPROPERTY(EditAnywhere)
-	class USoundBase* ButtonPressed;
-	
 	// Manually bind buttons.
 	UPROPERTY(meta = (BindWidget))
 	class UButton* PlayButton;
@@ -53,6 +49,9 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	class UButton* JMBackButton;			// Join Menu back button.
 
+	UPROPERTY(meta = (BindWidget))
+	class UButton* CCSBackButton;			// Choose character back button.
+
 	// Manually bind widget switcher.
 	UPROPERTY(meta = (BindWidget))
 	class UWidgetSwitcher* MenuSwitcher;
@@ -63,6 +62,9 @@ private:
 
 	UPROPERTY(meta = (BindWidget))
 	class UWidget* PlayerNameScreen;
+
+	UPROPERTY(meta = (BindWidget))
+	class UWidget* ChooseCharScreen;
 
 	UPROPERTY(meta = (BindWidget))
 	class UWidget* MainMenu;
@@ -80,7 +82,6 @@ private:
 	UFUNCTION()
 	void HostServer();
 
-	// Joins server running on player specified IPAddress.
 	UFUNCTION()
 	void JoinServer();
 
@@ -92,23 +93,28 @@ private:
 	void OpenPlayerName();
 
 	UFUNCTION()
+	void OpenChooseCharScreen();
+
+	UFUNCTION()
 	void OpenMainMenu();
 
-	// Takes player to Join Menu where they can enter host server's IP address.
 	UFUNCTION()
 	void OpenJoinMenu();
 
-	// Returns to player name widget screen.
 	UFUNCTION()
 	void ReturnToPlayerName();
 
-	// Returns to main menu widget screen.
+	UFUNCTION()
+	void ReturnToChooseChar();
+
 	UFUNCTION()
 	void ReturnToMain();
 
-	// Assigns player specified player name.
 	UFUNCTION()
 	void SetPlayerName();
+
+	UFUNCTION()
+	void SetPlayerChar();
 
 protected: 
 	virtual bool Initialize();

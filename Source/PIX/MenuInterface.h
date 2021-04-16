@@ -31,11 +31,15 @@ public:
 
 	virtual void SetGameMode(const FString& GameMode) = 0;
 
-	virtual void SetGameModeID(const FString& GameModeID) = 0;
-
 	virtual void LoadMainMenu() = 0;
 
 	virtual void LoadGame() = 0;
 
 	virtual void Replay() = 0;
+
+	// virtual void LoadDeathScreen() = 0;
+
+	// virtual void LoadRespawnScreen() = 0;
+
+	// virtual void LoadSpectateScreen() = 0;
 };

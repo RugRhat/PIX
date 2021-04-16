@@ -12,16 +12,20 @@ class PIX_API AHordeAI : public AAIController
 	GENERATED_BODY()
 	
 public:
-	// Called every frame.
 	virtual void Tick(float DeltaSeconds) override;
 
 protected:
 	UPROPERTY(EditAnywhere)
 	class UBehaviorTree* AIBehavior;
 
-	// Max AI attack distance.
+	// Finds all the player characters using the BP_Player class.
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AActor> PotentialPlayers;
+
+	// List of all players in current game.
+	TArray<AActor*> Players;
+
 	float AttackRange = 100000.0f;
 
-	// Called when the game starts or when spawned.
 	virtual void BeginPlay() override;
 };

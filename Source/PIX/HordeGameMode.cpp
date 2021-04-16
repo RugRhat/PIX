@@ -3,55 +3,48 @@
 
 #include "HordeGameMode.h"
 #include "BaseCharacter.h"
-#include "Engine/Engine.h"
 #include "EngineUtils.h"
 #include "DefaultPlayerState.h"
 #include "HealthComponent.h"
-#include "PIXGameState.h"
-#include "PIXGameInstance.h"
-#include "PlayerCharacter.h"
-#include "PlayerHUD.h"
+#include "HordeGameState.h"
 #include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
 
 // Sets default values for this gamemode's properties.
 AHordeGameMode::AHordeGameMode() 
 {
-    StartMatchDelay = 5.0f;
-    TimeBetweenWaves = 5.0f;
+    StartGameDelay = 5.0f;
+    TimeBetweenWaves = 2.0f;
     RespawnDelay = 5.0f;
 
-    GameStateClass = APIXGameState::StaticClass();
+    // Sets Default Player State as game mode's player state.
     PlayerStateClass = ADefaultPlayerState::StaticClass();
-    DefaultPawnClass = APlayerCharacter::StaticClass();
 
     PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.TickInterval = 1.0f;
 }
 
-// Called when the game starts or when spawned.
+// Called when game starts, if gamemode selected.
 void AHordeGameMode::BeginPlay() 
 {
     Super::BeginPlay();
 
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), SpawnPoints, SpawnLocations);
 
-    SetMatchState("WaitingForPlayers");
+    SetGameState(EHordeState::WaitingToBegin);
 
-    SetActorTickEnabled(true);
+    GetWorldTimerManager().SetTimer(TimerHandle_BeginGame, this, &AHordeGameMode::NewWave, StartGameDelay, false);
+    // NewWave();
 }
 
-// Handles starting game match.
-void AHordeGameMode::StartMatch() 
+// Sets game state.
+void AHordeGameMode::SetGameState(EHordeState NewState) 
 {
-    Super::StartMatch();
-
-    UE_LOG(LogTemp, Warning, TEXT("Start Match"));
-
-    Wave = 1;
-    EnemiesToSpawn = BaseNoOfEnemies;
-
-    // StartWave();
+    AHordeGameState* ThisGameState = GetGameState<AHordeGameState>();
+	if (ensureAlways(ThisGameState))
+	{
+		ThisGameState->SetGameState(NewState);
+	}
 }
 
 // Called every frame.
@@ -59,40 +52,24 @@ void AHordeGameMode::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
 
-    // Wait for all players to load into map before triggering intro.
-    if(NumTravellingPlayers == 0 && MatchState == "WaitingForPlayers")
-    {
-        CueGameIntro();
-    }
-    
-    if(!(MatchState == "WaitingForPlayers" || MatchState == "GameModeIntro"))
-    {
-        PlayersAlive();
-        EnemiesAlive();
-    }
-}
-
-// Changes match state to cue intro and starts countdown to start of match.
-void AHordeGameMode::CueGameIntro() 
-{
-    SetMatchState("GameModeIntro");
-    
-    GetWorldTimerManager().SetTimer(TimerHandle_StartMatch, this, &AHordeGameMode::StartWave, StartMatchDelay, false);
+    PlayersAlive();
+    EnemiesAlive();
 }
 
 void AHordeGameMode::StartWave() 
 {
-    SetMatchState("InProgress");
-
-    GetWorldTimerManager().SetTimer(TimerHandle_EnemySpawner, this, &AHordeGameMode::EnemySpawner, 1.0f, true, 0.0f);
-}
-
-// Increases no. of enemies & wave no.
-void AHordeGameMode::NewWave() 
-{
     Wave ++;
     EnemiesToSpawn = BaseNoOfEnemies * Wave;
 
+    GetWorldTimerManager().SetTimer(TimerHandle_EnemySpawner, this, &AHordeGameMode::EnemySpawner, 1.0f, true, 0.0f);
+
+    SetGameState(EHordeState::WaveStarted);
+   
+    SetActorTickEnabled(true);
+}
+
+void AHordeGameMode::NewWave() 
+{
     GetWorldTimerManager().SetTimer(TimerHandle_StartNewWave, this, &AHordeGameMode::StartWave, TimeBetweenWaves, false);
 
     // Players respawn if at least 1 teammate survived wave.
@@ -104,8 +81,7 @@ void AHordeGameMode::EndWave()
     GetWorldTimerManager().ClearTimer(TimerHandle_EnemySpawner);
 }
 
-
-// Checks if any players alive. If not, game ends. 
+// Handles player health regeneration if any players alive. 
 void AHordeGameMode::PlayersAlive() 
 {
     for (FConstPlayerControllerIterator ControlledPlayer = GetWorld()->GetPlayerControllerIterator(); ControlledPlayer; ++ControlledPlayer)
@@ -117,6 +93,11 @@ void AHordeGameMode::PlayersAlive()
 			UHealthComponent* HealthComp = Cast<UHealthComponent>(MyPawn->GetComponentByClass(UHealthComponent::StaticClass()));
 			if (ensure(HealthComp) && HealthComp->GetHealth() > 0.0f)
 			{
+                // Regen health if damaged
+                if(HealthComp->GetHealth() < HealthComp->DefaultHealth)
+                {
+                    HealthComp->Heal(2.0f);
+                }
 				return;              // A player is still alive.
 			}
 		}
@@ -157,45 +138,10 @@ void AHordeGameMode::EnemiesAlive()
     // Wave complete if all enemies dead, so start new wave.
     if(!bEnemyAlive)
     { 
-        SetMatchState("WaveComplete");
-        
-        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Wave Complete!!"));
-        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("Match State: %s"), *MatchState.ToString()));
+        SetGameState(EHordeState::WaveComplete);
 
         NewWave(); 
     }
-}
-
-void AHordeGameMode::IncreaseTeamKillCount() 
-{
-    TeamKills ++;
-}
-
-// Handles player respawning.
-void AHordeGameMode::RespawnPlayers() 
-{
-    for (FConstPlayerControllerIterator ControlledPlayer = GetWorld()->GetPlayerControllerIterator(); ControlledPlayer; ++ControlledPlayer)
-	{
-		APlayerController* PlayerController = ControlledPlayer->Get();
-		if (PlayerController && PlayerController->GetPawn() == nullptr)
-		{
-            RestartPlayer(PlayerController);  
-            
-            APlayerHUD* HUD = Cast<APlayerHUD>(PlayerController->GetHUD());
-			if(!HUD){ return; }
-
-			HUD->OnRespawned.Broadcast(PlayerController);
-        }
-    }
-}
-
-// Determines when to spawn enemies.
-void AHordeGameMode::EnemySpawner() 
-{
-    SpawnEnemy();
-
-    EnemiesToSpawn--;
-    if(EnemiesToSpawn <= 0){ EndWave(); }
 }
 
 // Handles spawning of enemies.
@@ -209,13 +155,38 @@ void AHordeGameMode::SpawnEnemy()
     GetWorld()->SpawnActor<ABaseCharacter>(EnemyCharacter, SpawnPointLocation, SpawnPointRotation);
 }
 
+// Handles player respawning (actual respawn called in blueprint).
+void AHordeGameMode::RespawnPlayers() 
+{
+    for (FConstPlayerControllerIterator ControlledPlayer = GetWorld()->GetPlayerControllerIterator(); ControlledPlayer; ++ControlledPlayer)
+	{
+		APlayerController* PlayerController = ControlledPlayer->Get();
+		if (PlayerController && PlayerController->GetPawn() == nullptr)
+		{
+            RestartPlayer(PlayerController);  
+        }
+    }
+}
+
+// Determines when to spawn enemies.
+void AHordeGameMode::EnemySpawner() 
+{
+    SpawnEnemy();
+
+    EnemiesToSpawn--;
+    if(EnemiesToSpawn <= 0){ EndWave(); }
+}
+
 // Handles game loss.
 void AHordeGameMode::HandleGameOver() 
 {
-    UE_LOG(LogTemp, Log, TEXT("GAME OVER! All Players Died"));
-
     SetActorTickEnabled(false);
 
     EndWave();
-    EndMatch();
+
+    SetGameState(EHordeState::GameOver);
+
+    UE_LOG(LogTemp, Log, TEXT("GAME OVER! All Players Died"));
+
+    // TODO: Implement UI endgame handling.
 }

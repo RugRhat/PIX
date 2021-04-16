@@ -6,9 +6,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "HealthComponent.h"
 #include "Net/UnrealNetwork.h"
-#include "Weapon.h"
 
 // Sets default values.
 APlayerCharacter::APlayerCharacter() 
@@ -25,8 +23,6 @@ APlayerCharacter::APlayerCharacter()
 	GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
 
 	MovementComponent = GetCharacterMovement();
-
-	HealthComp = Cast<UHealthComponent>(GetComponentByClass(UHealthComponent::StaticClass()));
 }
 
 // Controls which properties are replicated.
@@ -48,16 +44,6 @@ void APlayerCharacter::BeginPlay()
 	}
 	
     bAiming = false;
-
-	HealthComp->SetPlayerTeam();
-}
-
-void APlayerCharacter::Tick(float DeltaSeconds) 
-{
-	if(HealthComp->GetHealth() < 100)
-	{
-		HealthComp->Heal(1);
-	}
 }
 
 // Called to bind functionality to input
@@ -74,10 +60,8 @@ void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 	
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction(TEXT("Crouch"), EInputEvent::IE_Pressed, this, &APlayerCharacter::PlayerCrouch);
+	// PlayerInputComponent->BindAction(TEXT("Sprint"), EInputEvent::IE_Pressed, this, &APIXPlayer::Jump);		TODO: Implement sprinting.
 
-	/// TODO: Implement sprinting?
-	// PlayerInputComponent->BindAction(TEXT("Sprint"), EInputEvent::IE_Pressed, this, &APIXPlayer::Jump);		
-	
 	PlayerInputComponent->BindAction(TEXT("Shoot"), EInputEvent::IE_Pressed, this, &APlayerCharacter::UseWeapon);
 	PlayerInputComponent->BindAction(TEXT("Aim"), EInputEvent::IE_Pressed, this, &APlayerCharacter::StartAiming);
 	PlayerInputComponent->BindAction(TEXT("Aim"), EInputEvent::IE_Released, this, &APlayerCharacter::StopAiming);
@@ -190,22 +174,7 @@ bool APlayerCharacter::Server_StopAiming_Validate()
     return true;
 }
 
-// Called when by lobby menu to change player's weapon.
-void APlayerCharacter::ChangeWeapon(TSubclassOf<AWeapon> NewWeapon) 
-{
-	WeaponClass = NewWeapon;
-
-	if(Weapon)
-	{
-		Weapon->Destroy();
-	}	
-
-	SpawnWeapon();
-}
-
 float APlayerCharacter::GetHealthPercent() const
 {
-	return HealthComp->GetHealth()/HealthComp->DefaultHealth;       
+    return 0;       // TODO: implement grabbing health percentage.
 }
-
-
