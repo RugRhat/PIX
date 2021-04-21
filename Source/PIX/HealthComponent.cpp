@@ -146,32 +146,32 @@ void UHealthComponent::HandleGMDeath(APawn* Victim, class AController* KillerCon
 	class UPIXGameInstance* GameInstanceRef = Cast<UPIXGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
 	if(GameInstanceRef)
 	{
-	 	// if(GameInstanceRef->GetGameModeID() == "Horde")
-	 	// {
+	 	if(GameInstanceRef->GetGameModeID() == "Horde")
+	 	{
 	 		AHordeGameMode* GM = GetWorld()->GetAuthGameMode<AHordeGameMode>();
 			if(GM)
 			{ 
 				UE_LOG(LogTemp, Warning, TEXT("Game Mode: HORDE"));
 				GM->OnActorKilled.Broadcast(Victim, KillerController); 
 			}
-	 	// }
-		// else if(GameInstanceRef->GetGameModeID() == "TDM")
-		// {
-		// 	ATDMGameMode* GM = GetWorld()->GetAuthGameMode<ATDMGameMode>();
-		// 	if(GM)
-		// 	{
-		// 		UE_LOG(LogTemp, Warning, TEXT("Game Mode: TDM"));
-		// 		GM->OnActorKilled.Broadcast(Victim, KillerController);
-		// 	}
-		// }
-	 	// else //if(GameInstanceRef->GetGameModeID() == "FFA")		// FOR DEV ONLY!!!! 
-	 	// {
-		// 	AFFAGameMode* GM = GetWorld()->GetAuthGameMode<AFFAGameMode>();
-		// 	if(GM)
-		// 	{ 
-		// 		UE_LOG(LogTemp, Warning, TEXT("Game Mode: FFA"));
-		// 		GM->OnActorKilled.Broadcast(Victim, KillerController); 
-		// 	}
-	 	// }
+	 	}
+		else if(GameInstanceRef->GetGameModeID() == "TDM")
+		{
+			ATDMGameMode* GM = GetWorld()->GetAuthGameMode<ATDMGameMode>();
+			if(GM)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Game Mode: TDM"));
+				GM->OnActorKilled.Broadcast(Victim, KillerController);
+			}
+		}
+	 	else //if(GameInstanceRef->GetGameModeID() == "FFA")		// Defaults to FFA (FOR DEV ONLY!!!!) 
+	 	{
+			AFFAGameMode* GM = GetWorld()->GetAuthGameMode<AFFAGameMode>();
+			if(GM)
+			{ 
+				UE_LOG(LogTemp, Warning, TEXT("Game Mode: FFA"));
+				GM->OnActorKilled.Broadcast(Victim, KillerController); 
+			}
+	 	}
 	}
 }

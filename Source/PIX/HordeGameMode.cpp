@@ -218,4 +218,16 @@ void AHordeGameMode::HandleGameOver()
 
     EndWave();
     EndMatch();
+
+    for (FConstPlayerControllerIterator ControlledPlayer = GetWorld()->GetPlayerControllerIterator(); ControlledPlayer; ++ControlledPlayer)
+	{
+		APlayerController* PlayerController = ControlledPlayer->Get();
+		if (PlayerController)
+		{
+            APlayerHUD* HUD = Cast<APlayerHUD>(PlayerController->GetHUD());
+			if(!HUD){ return; }
+
+            HUD->Loser.Broadcast(PlayerController);
+        }
+    }
 }

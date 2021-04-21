@@ -42,6 +42,12 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player")
 	bool bWeaponChosen;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom")
+	TArray<USkeletalMesh*> Characters;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom")
+	TArray<TSubclassOf<AWeapon>> Weapons;
+
 	// Loads main menu widget.
 	UFUNCTION(BlueprintCallable)
 	void LoadMenu();
@@ -56,7 +62,7 @@ public:
 
 	// Loads end game menu widget.
 	UFUNCTION(BlueprintCallable)
-	void LoadEndGameMenu();
+	void LoadEndGameMenu(bool IsWinner);
 
 	// Sets owning player's chosen character.
 	UFUNCTION(BlueprintCallable, Category = "Player")
@@ -69,10 +75,6 @@ public:
 	// Return's active game mode ID.
 	UFUNCTION(BlueprintCallable, Category = "GameMode")
 	FString GetGameModeID();
-
-	// Takes single player to default game mode map: Horde.
-	UFUNCTION(Exec)
-	void Single() override;
 
 	// Takes host player to lobby.
 	UFUNCTION(Exec)
@@ -95,6 +97,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "GameMode")
 	virtual void SetGameModeID(const FString &GameModeID) override;
 
+	UFUNCTION(BlueprintCallable, Category = "GameMode")
+	virtual void BackToLobby() override;
+
+	UFUNCTION(BlueprintCallable, Category = "GameMode")
+	void RemoveLobbyMenu();
+
+	UFUNCTION(BlueprintCallable, Category = "GameMode")
+	void RemoveInGameMenu();
+	
 	// Loads main menu map.
 	virtual void LoadMainMenu() override;
 
@@ -115,8 +126,13 @@ protected:
 	// Game Menus.
 	TSubclassOf<class UUserWidget> MenuClass;
 	TSubclassOf<class UUserWidget> LobbyMenuClass;
-	TSubclassOf<class UUserWidget> WinScreenMenuClass;
+	TSubclassOf<class UUserWidget> InGameMenuClass;
+	TSubclassOf<class UUserWidget> EndGameMenuClass;
+
+	UPROPERTY(BlueprintReadOnly, category = "Menus")
+	class UEndGameMenu* EndGameMenu;
 
 	class UMainMenu* Menu;
 	class ULobbyMenu* LobbyMenu;
+	class UInGameMenu* InGameMenu;
 };

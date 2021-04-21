@@ -27,6 +27,10 @@ public:
 	void CheckKillCount();
 
 protected:
+	// Randomly places each player on a team.
+	UFUNCTION(BlueprintCallable, Category = "Gameplay") 
+	void SetPlayerTeams();
+
 	// Max number of kills required to win game.
 	UPROPERTY(EditDefaultsOnly)
 	uint32 MaxKills = 15;
@@ -60,6 +64,9 @@ protected:
 
 	// Called when the game starts or when spawned.
 	virtual void BeginPlay() override;
+
+	int TeamCount_1;
+	int TeamCount_2;
 
 	FTimerHandle TimerHandle_StartMatch;					// Timer for starting a new match.
 };

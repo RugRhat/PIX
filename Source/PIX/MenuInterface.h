@@ -23,8 +23,6 @@ class PIX_API IMenuInterface
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	// ALL EMPTY IMPLEMENTATIONS.
-	virtual void Single() = 0;
-	
 	virtual void Host() = 0;			
 
 	virtual void Join(const FString& Address) = 0;
@@ -36,6 +34,8 @@ public:
 	virtual void LoadMainMenu() = 0;
 
 	virtual void LoadGame() = 0;
+
+	virtual void BackToLobby() = 0;
 
 	virtual void Replay() = 0;
 };

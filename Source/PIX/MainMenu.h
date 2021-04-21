@@ -15,10 +15,6 @@ class PIX_API UMainMenu : public UMenuWidget
 	GENERATED_BODY()
 
 private:
-	// Button pressed sound.
-	UPROPERTY(EditAnywhere)
-	class USoundBase* ButtonPressed;
-	
 	// Manually bind buttons.
 	UPROPERTY(meta = (BindWidget))
 	class UButton* PlayButton;
@@ -27,31 +23,16 @@ private:
 	class UButton* EnterNameButton;
 
 	UPROPERTY(meta = (BindWidget))
-	class UButton* SinglePlayerButton;
-
-	UPROPERTY(meta = (BindWidget))
 	class UButton* HostButton;
 
 	UPROPERTY(meta = (BindWidget))
 	class UButton* JoinButton;
 
 	UPROPERTY(meta = (BindWidget))
+	class UButton* QuitButton;
+
+	UPROPERTY(meta = (BindWidget))
 	class UButton* JoinServerButton;
-
-	UPROPERTY(meta = (BindWidget))
-	class UButton* SelectCharButton;
-
-	UPROPERTY(meta = (BindWidget))
-	class UButton* QuitButton;				// Main quit button.
-
-	UPROPERTY(meta = (BindWidget))
-	class UButton* PNSQuitButton;			// Enter username quit button.
-
-	UPROPERTY(meta = (BindWidget))
-	class UButton* MMBackButton;			// Main Menu back button.
-
-	UPROPERTY(meta = (BindWidget))
-	class UButton* JMBackButton;			// Join Menu back button.
 
 	// Manually bind widget switcher.
 	UPROPERTY(meta = (BindWidget))
@@ -80,12 +61,9 @@ private:
 	UFUNCTION()
 	void HostServer();
 
-	// Joins server running on player specified IPAddress.
+	// Joins server running on player specified IP Address.
 	UFUNCTION()
 	void JoinServer();
-
-	UFUNCTION()
-	void QuitGame();	
 
 	// Menu switching functions.
 	UFUNCTION()
@@ -98,17 +76,12 @@ private:
 	UFUNCTION()
 	void OpenJoinMenu();
 
-	// Returns to player name widget screen.
-	UFUNCTION()
-	void ReturnToPlayerName();
-
-	// Returns to main menu widget screen.
-	UFUNCTION()
-	void ReturnToMain();
-
 	// Assigns player specified player name.
 	UFUNCTION()
 	void SetPlayerName();
+
+	UFUNCTION()
+	void QuitGame();
 
 protected: 
 	virtual bool Initialize();

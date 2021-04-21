@@ -79,6 +79,8 @@ void AWeapon::PullTrigger()
 		}
 
 		AmmoCount --;
+
+		WeaponFired.Broadcast();
 	}
 
 	ShootEffects();

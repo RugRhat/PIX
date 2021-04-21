@@ -59,6 +59,18 @@ void AFFAGameMode::Tick(float DeltaSeconds)
     }
 }
 
+/// TODO: Play test how well this works.
+void AFFAGameMode::CueGameIntro() 
+{
+    SetMatchState("GameModeIntro");
+
+    SetPlayerTeams();
+
+    GetWorldTimerManager().SetTimer(TimerHandle_StartMatch, this, &AFFAGameMode::StartMatch, StartMatchDelay, false);
+
+    SetMatchState("InProgress");
+}
+
 // Places each player on a unique team.
 void AFFAGameMode::SetPlayerTeams() 
 {
@@ -75,19 +87,6 @@ void AFFAGameMode::SetPlayerTeams()
             Team ++;
         }
     }
-}
-
-
-/// TODO: Play test how well this works.
-void AFFAGameMode::CueGameIntro() 
-{
-    SetMatchState("GameModeIntro");
-
-    SetPlayerTeams();
-
-    GetWorldTimerManager().SetTimer(TimerHandle_StartMatch, this, &AFFAGameMode::StartMatch, StartMatchDelay, false);
-
-    SetMatchState("InProgress");
 }
 
 // Checks if max kill count reached.

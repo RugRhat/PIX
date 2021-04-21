@@ -5,6 +5,8 @@
 #include "Engine/Engine.h"
 #include "Engine/SkeletalMesh.h"
 #include "Engine/World.h"
+#include "EndGameMenu.h"
+#include "InGameMenu.h"
 #include "LobbyMenu.h"
 #include "MainMenu.h"
 #include "MenuWidget.h"
@@ -27,17 +29,17 @@ UPIXGameInstance::UPIXGameInstance(const FObjectInitializer &ObjectInitializer)
 
     LobbyMenuClass = LobbyMenuBPClass.Class;
 
-    // // Allows for more control of Menu UI from source code rather than blueprints.
-    // ConstructorHelpers::FClassFinder<UUserWidget>InGameMenuBPClass(TEXT("/Game/UI/WBP_InGameMenu"));
-    // if(!ensure(InGameMenuBPClass.Class != nullptr)) return;
+    // Allows for more control of Menu UI from source code rather than blueprints.
+    ConstructorHelpers::FClassFinder<UUserWidget>InGameMenuBPClass(TEXT("/Game/UI/Menus/WBP_InGameMenu"));
+    if(!ensure(InGameMenuBPClass.Class != nullptr)) return;
 
-    // InGameMenuClass = InGameMenuBPClass.Class;
+    InGameMenuClass = InGameMenuBPClass.Class;
 
-    // // Allows for more control of Menu UI from source code rather than blueprints.
-    // ConstructorHelpers::FClassFinder<UUserWidget>EndGameMenuBPClass(TEXT("/Game/UI/WBP_EndGameMenu"));
-    // if(!ensure(EndGameMenuBPClass.Class != nullptr)) return;
+    // Allows for more control of Menu UI from source code rather than blueprints.
+    ConstructorHelpers::FClassFinder<UUserWidget>EndGameMenuBPClass(TEXT("/Game/UI/Menus/WBP_EndGameMenu"));
+    if(!ensure(EndGameMenuBPClass.Class != nullptr)) return;
 
-    // EndGameMenuClass = EndGameMenuBPClass.Class;
+    EndGameMenuClass = EndGameMenuBPClass.Class;
 
     PlayerTeam = 1;
 
@@ -78,25 +80,27 @@ void UPIXGameInstance::LoadLobbyMenu()
 // Loads in-game menu widget.
 void UPIXGameInstance::LoadInGameMenu() 
 {
-    // if(!ensure(InGameMenuClass != nullptr)) return;
+    if(!ensure(InGameMenuClass != nullptr)) return;
 
-    // InGameMenu = CreateWidget<UInGameMenu>(this, InGameMenuClass);
+    InGameMenu = CreateWidget<UInGameMenu>(this, InGameMenuClass);
 
-    // InGameMenu->Setup();
+    InGameMenu->Setup();
 
-    // InGameMenu->SetMenuInterface(this);
+    InGameMenu->SetMenuInterface(this);
 }
 
 // Loads end game menu widget.
-void UPIXGameInstance::LoadEndGameMenu() 
+void UPIXGameInstance::LoadEndGameMenu(bool IsWinner) 
 {
-    // if(!ensure(EndGameMenuClass != nullptr)) return;
+    if(!ensure(EndGameMenuClass != nullptr)) return;
 
-    // EndGameMenu = CreateWidget<UEGMenu>(this, EndGameMenuClass);
+    EndGameMenu = CreateWidget<UEndGameMenu>(this, EndGameMenuClass);
 
-    // EndGameMenu->Setup();
+    EndGameMenu->IsWinner = IsWinner;
 
-    // EndGameMenu->SetMenuInterface(this);
+    EndGameMenu->Setup();
+
+    EndGameMenu->SetMenuInterface(this);
 }
 
 // Sets owning player's chosen character.
@@ -114,17 +118,6 @@ void UPIXGameInstance::SetPlayerWeapon(TSubclassOf<AWeapon>ChosenWeapon)
     PlayerWeapon = ChosenWeapon;
 
     GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Player weapon chosen"));
-}
-
-// Takes single player to default game mode map: Horde.
-void UPIXGameInstance::Single() 
-{
-    UWorld* World = GetWorld();
-    if(!ensure(World != nullptr)) return;
-
-    World->ServerTravel("/Game/Maps/GameModes/Horde?game=/Game/Blueprints/GameModes/BP_HordeGameMode.BP_HordeGameMode_C?listen");      // Switches to Horde map. 
-
-    SetGameModeID("Horde");
 }
 
 // Takes host player to lobby.
@@ -202,6 +195,30 @@ void UPIXGameInstance::LoadMainMenu()
     if(!ensure(PlayerController != nullptr)) return;
 
     PlayerController->ClientTravel("/Game/Maps/Intro", ETravelType::TRAVEL_Absolute);
+}
+
+void UPIXGameInstance::BackToLobby() 
+{
+    UWorld* World = GetWorld();
+    if(!ensure(World != nullptr)) return;
+
+    World->ServerTravel("/Game/Maps/Lobby?game=/Game/Blueprints/GameModes/BP_LobbyGameMode.BP_LobbyGameMode_C?listen");
+}
+
+void UPIXGameInstance::RemoveLobbyMenu() 
+{
+    if(LobbyMenu != nullptr)
+    {
+        LobbyMenu->RemoveMenu();
+    }
+}
+
+void UPIXGameInstance::RemoveInGameMenu() 
+{
+    if(InGameMenu != nullptr)
+    {
+        InGameMenu->RemoveMenu();
+    }
 }
 
 // "Replays" game by having the server re-travel to game mode map.

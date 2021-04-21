@@ -19,10 +19,6 @@ protected:
 	UPROPERTY(BlueprintAssignable, Category = "Gameplay")
 	FOnGameModeSelected GameModeSelected;
 
-	// Button pressed sound.
-	UPROPERTY(EditAnywhere)
-	class USoundBase* ButtonPressed;
-
 	// Manually bind buttons.
 	UPROPERTY(meta = (BindWidget))
 	class UButton* HordeButton;

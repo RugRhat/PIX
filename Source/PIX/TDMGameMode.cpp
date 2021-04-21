@@ -22,6 +22,9 @@ ATDMGameMode::ATDMGameMode()
 
     PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.TickInterval = 1.0f;
+
+    TeamCount_1 = 0;
+    TeamCount_2 = 0;
 }
 
 // Called when the game starts or when spawned.
@@ -63,9 +66,35 @@ void ATDMGameMode::CueGameIntro()
 {
     SetMatchState("GameModeIntro");
 
+    SetPlayerTeams();
+    
     GetWorldTimerManager().SetTimer(TimerHandle_StartMatch, this, &ATDMGameMode::StartMatch, StartMatchDelay, false); 
     
     SetMatchState("InProgress");
+}
+
+// Randomly places each player on a team.
+void ATDMGameMode::SetPlayerTeams() 
+{
+    for (FConstPlayerControllerIterator ControlledPlayer = GetWorld()->GetPlayerControllerIterator(); ControlledPlayer; ++ControlledPlayer)
+	{
+        APlayerController* PlayerController = Cast<APlayerController>(ControlledPlayer->Get());
+        UPIXGameInstance* GameInstance = Cast<UPIXGameInstance>(PlayerController->GetGameInstance());
+        
+        if(ensure(GameInstance))
+        {
+            if(TeamCount_1 < (GetNumPlayers() / 2))
+            {
+                GameInstance->PlayerTeam = 1;
+                TeamCount_1 ++;
+            }
+            else
+            {
+                GameInstance->PlayerTeam = 2;
+                TeamCount_2 ++;
+            }
+        }
+    }
 }
 
 void ATDMGameMode::IncreaseTeamKillCount(int TeamNum) 
@@ -92,6 +121,7 @@ void ATDMGameMode::CheckKillCount()
         HandleGameOver(2);
     }
 }
+
 
 // Handles game over.
 void ATDMGameMode::HandleGameOver(int WinningTeamNum) 

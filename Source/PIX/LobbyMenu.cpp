@@ -114,8 +114,6 @@ void ULobbyMenu::OpenCharCustomizer()
     if(!ensure(MenuSwitcher != nullptr)) return;
     if(!ensure(CustomizeCharacter != nullptr)) return;
 
-    PlaySound(ButtonPressed);
-
     MenuSwitcher->SetActiveWidget(CustomizeCharacter);
 }
 
@@ -124,8 +122,6 @@ void ULobbyMenu::OpenGMSelect()
     if(!ensure(MenuSwitcher != nullptr)) return;
     if(!ensure(SelectGameMode != nullptr)) return;
 
-    PlaySound(ButtonPressed);
-    
     MenuSwitcher->SetActiveWidget(SelectGameMode);
 }
 
