@@ -28,19 +28,19 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player")
 	FString PlayerName;
 
-	// Owning player's chosen character. Declared here to survive level change.
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player")
-	class USkeletalMesh* PlayerChar;		
+	// // Owning player's chosen character. Declared here to survive level change.
+	// UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player")
+	// class USkeletalMesh* PlayerChar;		
 
-	// Owning player's chosen weapon. Declared here to survive level change.
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player")
-	TSubclassOf<AWeapon> PlayerWeapon;
+	// // Owning player's chosen weapon. Declared here to survive level change.
+	// UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player")
+	// TSubclassOf<AWeapon> PlayerWeapon;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player")
-	bool bCharChosen;
+	// UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player")
+	// bool bCharChosen;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player")
-	bool bWeaponChosen;
+	// UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player")
+	// bool bWeaponChosen;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom")
 	TArray<USkeletalMesh*> Characters;
@@ -64,13 +64,13 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void LoadEndGameMenu(bool IsWinner);
 
-	// Sets owning player's chosen character.
-	UFUNCTION(BlueprintCallable, Category = "Player")
-	void SetPlayerCharacter(USkeletalMesh* ChosenCharacterClass);
+	// // Sets owning player's chosen character.
+	// UFUNCTION(BlueprintCallable, Category = "Player")
+	// void SetPlayerCharacter(USkeletalMesh* ChosenCharacterClass);
 
-	// Sets owning player's chosen weapon.
-	UFUNCTION(BlueprintCallable, Category = "Player")
-	void SetPlayerWeapon(TSubclassOf<AWeapon> ChosenWeapon);
+	// // Sets owning player's chosen weapon.
+	// UFUNCTION(BlueprintCallable, Category = "Player")
+	// void SetPlayerWeapon(TSubclassOf<AWeapon> ChosenWeapon);
 	
 	// Return's active game mode ID.
 	UFUNCTION(BlueprintCallable, Category = "GameMode")

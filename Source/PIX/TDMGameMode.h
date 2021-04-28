@@ -47,6 +47,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "GameMode")
 	float StartMatchDelay;
 
+	// Determines delay time before setting player teams. Can be changed from editor.
+	UPROPERTY(EditDefaultsOnly, Category = "GameMode")
+	float SetTeamsDelay;
+
 	UFUNCTION(BlueprintCallable, Category = "GameMode")
 	void IncreaseTeamKillCount(int TeamNum);
 
@@ -69,4 +73,5 @@ protected:
 	int TeamCount_2;
 
 	FTimerHandle TimerHandle_StartMatch;					// Timer for starting a new match.
+	FTimerHandle TimerHandle_SetTeams;						// Timer for setting player teams.
 };

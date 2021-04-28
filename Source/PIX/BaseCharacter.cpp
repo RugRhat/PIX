@@ -15,6 +15,8 @@ ABaseCharacter::ABaseCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComp"));
+
+	bCanShoot = true;
 }
 
 // Controls which properties are replicated.
@@ -35,10 +37,10 @@ void ABaseCharacter::BeginPlay()
 	HealthComponent->OnHealthChanged.AddDynamic(this, &ABaseCharacter::OnHealthChanged);
 	
 	// "Has authority" refers to server. Server controls spawning of selected weapon.
-	if(HasAuthority())
-	{
+	// if(HasAuthority())
+	// {
 		SpawnWeapon();
-	}
+	// }
 }
 
 void ABaseCharacter::SpawnWeapon() 
@@ -73,6 +75,8 @@ void ABaseCharacter::Reload()
 	// bReloading = true;
 
 	Weapon->Reload();
+
+	bCanShoot = true;
 }
 
 // Returns ammo count so AI knows when to reload.

@@ -43,7 +43,7 @@ UPIXGameInstance::UPIXGameInstance(const FObjectInitializer &ObjectInitializer)
 
     PlayerTeam = 1;
 
-    bCharChosen = false;
+    // bCharChosen = false;
 }
 
 // Sets up custom game instance properties.
@@ -103,22 +103,22 @@ void UPIXGameInstance::LoadEndGameMenu(bool IsWinner)
     EndGameMenu->SetMenuInterface(this);
 }
 
-// Sets owning player's chosen character.
-void UPIXGameInstance::SetPlayerCharacter(USkeletalMesh* ChosenCharacter)
-{
-    bCharChosen = true;
-    PlayerChar = ChosenCharacter;
+// // Sets owning player's chosen character.
+// void UPIXGameInstance::SetPlayerCharacter(USkeletalMesh* ChosenCharacter)
+// {
+//     // bCharChosen = true;
+//     PlayerChar = ChosenCharacter;
 
-    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Player Character chosen"));
-}
+//     GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Player Character chosen"));
+// }
 
-void UPIXGameInstance::SetPlayerWeapon(TSubclassOf<AWeapon>ChosenWeapon) 
-{
-    bWeaponChosen = true;
-    PlayerWeapon = ChosenWeapon;
+// void UPIXGameInstance::SetPlayerWeapon(TSubclassOf<AWeapon>ChosenWeapon) 
+// {
+//     // bWeaponChosen = true;
+//     PlayerWeapon = ChosenWeapon;
 
-    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Player weapon chosen"));
-}
+//     GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Player weapon chosen"));
+// }
 
 // Takes host player to lobby.
 void UPIXGameInstance::Host() 

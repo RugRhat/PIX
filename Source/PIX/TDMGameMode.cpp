@@ -14,6 +14,7 @@
 // Sets default values for this gamemode's properties.
 ATDMGameMode::ATDMGameMode() 
 {
+    SetTeamsDelay = 2.5f;
     StartMatchDelay = 5.0f;
 
     GameStateClass = APIXGameState::StaticClass();
@@ -66,7 +67,7 @@ void ATDMGameMode::CueGameIntro()
 {
     SetMatchState("GameModeIntro");
 
-    SetPlayerTeams();
+    GetWorldTimerManager().SetTimer(TimerHandle_SetTeams, this, &ATDMGameMode::SetPlayerTeams, SetTeamsDelay, false);
     
     GetWorldTimerManager().SetTimer(TimerHandle_StartMatch, this, &ATDMGameMode::StartMatch, StartMatchDelay, false); 
     
@@ -93,6 +94,14 @@ void ATDMGameMode::SetPlayerTeams()
                 GameInstance->PlayerTeam = 2;
                 TeamCount_2 ++;
             }
+        }
+
+        APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(PlayerController->GetPawn());
+        UHealthComponent* HealthComp = Cast<UHealthComponent>(PlayerCharacter->GetComponentByClass(UHealthComponent::StaticClass()));
+
+        if(ensure(HealthComp))
+        {
+            HealthComp->SetPlayerTeam();
         }
     }
 }

@@ -9,11 +9,14 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "HealthComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "TimerManager.h"
 #include "Weapon.h"
 
 // Sets default values.
 APlayerCharacter::APlayerCharacter() 
 {
+	ReloadDelay = 2.75f;
+
     // Creates spring arm which controls camera movement.
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Spring Arm"));
 	SpringArm->SetupAttachment(RootComponent);
@@ -133,6 +136,19 @@ void APlayerCharacter::PlayerCrouch()
 	}
 }
 
+void APlayerCharacter::UseWeapon() 
+{
+	if(bCanShoot)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Can Shoot"));
+		Super::UseWeapon();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Can't Shoot"));
+	}
+}
+
 // Pulls camera in when aiming.
 void APlayerCharacter::StartAiming() 
 {
@@ -194,6 +210,8 @@ bool APlayerCharacter::Server_StopAiming_Validate()
 // Called to trigger reload animation.
 void APlayerCharacter::Reload() 
 {
+	bCanShoot = false;
+	
 	if(bAiming)
 	{
 		PlayAnimMontage(AimingReloadMontage);
@@ -203,8 +221,10 @@ void APlayerCharacter::Reload()
 		PlayAnimMontage(ReloadMontage);
 	}
 
-	Super::Reload();
+	GetWorldTimerManager().SetTimer(TimerHandle_Reload, this, &ABaseCharacter::Reload, ReloadDelay, false);
 }
+
+
 
 // Called when by lobby menu to change player's weapon.
 void APlayerCharacter::ChangeWeapon(TSubclassOf<AWeapon> NewWeapon) 

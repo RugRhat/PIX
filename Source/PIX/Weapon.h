@@ -25,6 +25,7 @@ public:
 	UPROPERTY(ReplicatedUsing = OnRep_AmmoCount, BlueprintReadOnly, Category = "Weapon")
 	float AmmoCount; 
 
+
 protected:
 	// Handles linetrace and returns whether trace was successful.
 	bool GunTrace(FHitResult& Hit, FVector& ShotDirection);

@@ -54,4 +54,6 @@ protected:
 	void Server_Reload();
 
 	void SpawnWeapon();
+
+	bool bCanShoot;
 };

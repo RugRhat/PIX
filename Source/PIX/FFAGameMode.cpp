@@ -14,6 +14,7 @@
 // Sets default values for this gamemode's properties.
 AFFAGameMode::AFFAGameMode() 
 {
+    SetTeamsDelay = 3.5f;
     StartMatchDelay = 5.0f;
 
     GameStateClass = APIXGameState::StaticClass();
@@ -64,7 +65,7 @@ void AFFAGameMode::CueGameIntro()
 {
     SetMatchState("GameModeIntro");
 
-    SetPlayerTeams();
+    GetWorldTimerManager().SetTimer(TimerHandle_SetTeams, this, &AFFAGameMode::SetPlayerTeams, SetTeamsDelay, false);
 
     GetWorldTimerManager().SetTimer(TimerHandle_StartMatch, this, &AFFAGameMode::StartMatch, StartMatchDelay, false);
 
@@ -86,6 +87,18 @@ void AFFAGameMode::SetPlayerTeams()
             GameInstance->PlayerTeam = Team;
             Team ++;
         }
+
+        APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(PlayerController->GetPawn());
+        if(PlayerCharacter)
+        {
+            UHealthComponent* HealthComp = Cast<UHealthComponent>(PlayerCharacter->GetComponentByClass(UHealthComponent::StaticClass()));
+            
+            if(ensure(HealthComp))
+            {
+                HealthComp->SetPlayerTeam();
+            }
+        }
+
     }
 }
 

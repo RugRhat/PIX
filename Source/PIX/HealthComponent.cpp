@@ -2,6 +2,7 @@
 
 
 #include "HealthComponent.h"
+#include "Engine/Engine.h"
 #include "FFAGameMode.h"
 #include "HordeGameMode.h"
 #include "Kismet/GameplayStatics.h"
@@ -52,12 +53,12 @@ void UHealthComponent::BeginPlay()
 void UHealthComponent::SetPlayerTeam() 
 {
 	APlayerController* PlayerController = Cast<APlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+	UPIXGameInstance* GameInstance = Cast<UPIXGameInstance>(PlayerController->GetGameInstance());
 	
-	if(PlayerController->GetPawn())
+	if(ensure(GameInstance))
 	{
-		UPIXGameInstance* GameInstance = Cast<UPIXGameInstance>(PlayerController->GetPawn()->GetGameInstance());
-
 		TeamNum = GameInstance->PlayerTeam;
+		// GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Player Team: %d"), &TeamNum);
 	}
 }
 

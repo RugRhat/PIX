@@ -61,6 +61,10 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void ChangeWeapon(TSubclassOf<AWeapon> NewWeapon);
 
+	// Determines delay time before reloading weapon. Can be changed from editor.
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	float ReloadDelay;
+
 	void MoveForward(float AxisValue);	
 	void MoveRight(float AxisValue);
 	void LookUpRate(float AxisValue);
@@ -78,6 +82,8 @@ protected:
 	// Called to trigger reload animation.
 	void Reload();
 
+	void UseWeapon();
+
 	// Called when the game starts or when spawned.
 	virtual void BeginPlay() override;
 
@@ -93,4 +99,5 @@ protected:
 	// Pointer to player's health component.
 	class UHealthComponent* HealthComp;
 
+	FTimerHandle TimerHandle_Reload;						// Timer for reloading.
 };
