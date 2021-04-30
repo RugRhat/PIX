@@ -37,10 +37,10 @@ void ABaseCharacter::BeginPlay()
 	HealthComponent->OnHealthChanged.AddDynamic(this, &ABaseCharacter::OnHealthChanged);
 	
 	// "Has authority" refers to server. Server controls spawning of selected weapon.
-	// if(HasAuthority())
-	// {
+	if(HasAuthority())
+	{
 		SpawnWeapon();
-	// }
+	}
 }
 
 void ABaseCharacter::SpawnWeapon() 

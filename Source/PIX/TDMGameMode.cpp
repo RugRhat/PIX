@@ -14,7 +14,7 @@
 // Sets default values for this gamemode's properties.
 ATDMGameMode::ATDMGameMode() 
 {
-    SetTeamsDelay = 2.5f;
+    SetTeamsDelay = 3.5f;
     StartMatchDelay = 5.0f;
 
     GameStateClass = APIXGameState::StaticClass();
